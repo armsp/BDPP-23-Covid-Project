@@ -1,5 +1,9 @@
 # BDPP-23-Covid-Project
 
-## Test playground (Lecture 07)
+# Docker
 
-See [here](session4/readme.md).
+See [here](docker/readme.md).
+
+## Test playground session 4/lecture 7
+
+See [here](work/session4/readme.md).
