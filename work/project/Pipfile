@@ -6,6 +6,8 @@ name = "pypi"
 [packages]
 jupyterlab = "*"
 pandas = "*"
+matplotlib = "*"
+openpyxl = "*"
 
 [dev-packages]
 
