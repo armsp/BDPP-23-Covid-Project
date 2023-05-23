@@ -1,4 +1,4 @@
-We assume you have `pipenv` and `python 3.11` installed on your machine (or virtual machine).
+We assume you have `pipenv` and `python 3.9` installed on your machine (or virtual machine).
 
 1. Navigate to `session4` 
 2. Run `PIPENV_VENV_IN_PROJECT=1 pipenv install` This way, the virtual enviroment is created in the repository and is gone once you delete it. **If using Docker** or you know better, just run `pipenv install`.

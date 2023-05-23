@@ -13,7 +13,7 @@ container_name="bdpp_covid_container"
 if [ ! "$( docker ps | grep $container_name )" ]; then
 
 	echo "launching..."
-	# launch container and bind mount the node root for development
+	# launch container and bind mount the work directory for development
 	docker run \
 		--name $container_name \
 		-it \
