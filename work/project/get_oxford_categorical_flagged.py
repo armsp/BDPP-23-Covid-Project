@@ -8,6 +8,7 @@ from IPython.display import display, HTML
 import matplotlib.pyplot as plt
 import math
 import require
+import os
 get_oxford_df = require.single( "get_oxford_df" )
 
 def get_oxford_categorical_flagged( country, indicator, verbose = True ):
@@ -16,7 +17,16 @@ def get_oxford_categorical_flagged( country, indicator, verbose = True ):
     flag_file = f"data/{ indicator.split( '_' )[ 0 ]}_flag.csv"
     
     series_df = get_oxford_df( series_file, country )
-    flag_df = get_oxford_df( flag_file, country )
+
+    if not os.path.exists( flag_file ):
+
+        flag_df = series_df.copy( )
+        flag_df.series = 1.0
+    
+    else:
+    
+            flag_df = get_oxford_df( flag_file, country )
+    
     flag_df.columns = [ "flag" ]
 
     if verbose:
@@ -40,6 +50,7 @@ def get_oxford_categorical_flagged( country, indicator, verbose = True ):
         plt.show( )
 
     nnz_values = [ v for v in masked_series.unique( ) if not math.isnan( v ) and not v == 0 ]
+    nnz_values.sort( )
 
     if verbose:
 
