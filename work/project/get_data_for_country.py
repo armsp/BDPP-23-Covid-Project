@@ -53,17 +53,25 @@ def get_data_for_country( country, verbose = True ):
     # outcomes
 
     columns = [ "new_cases_smoothed_per_million", "new_deaths_smoothed_per_million", "weekly_hosp_admissions_per_million" ]
-    outcome_df = df[ columns ]
+    outcome_df = df[ columns ].copy( )
+
+    for c in columns:
+
+        outcome_df[ np.isnan( outcome_df[ c ])] = 0
 
     if verbose:
 
         display( HTML( f"<h3>outcomes</h3>" ))
-        plot_all( df, columns )
+        plot_all( outcome_df )
 
     # OWID measures
 
     columns = [ "new_vaccinations_smoothed_per_million", "new_tests_smoothed_per_thousand" ]
     measure_df = df[ columns ].copy( )
+
+    for c in columns:
+
+        measure_df[ np.isnan( measure_df[ c ])] = 0
 
     # Oxford measures
 
@@ -96,7 +104,8 @@ def get_data_for_country( country, verbose = True ):
 
     if verbose:
 
-        display( HTML( f"<h3>measures</h3>" ))
+        url = "https://github.com/OxCGRT/covid-policy-tracker/blob/master/documentation/codebook.md#containment-and-closure-policies"
+        display( HTML( f"<h3>measures</h3><p><a href={ url }>see here</a> for an explanation of categorical values</p>" ))
         plot_all( measure_df )
 
     full_df = pd.concat([ outcome_df, measure_df ], axis = 1 )
