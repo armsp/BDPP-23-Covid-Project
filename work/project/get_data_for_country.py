@@ -96,7 +96,9 @@ def get_data_for_country( country, verbose = True ):
             
             if key in dummy_series:
 
-                measure_df[ column ] = dummy_series[ key ]
+                date_offset = 2 # oxford data starts 2 days earlier, just discard it
+                measure_df[ column ] = dummy_series[ key ][ date_offset: ]
+                assert measure_df.index[ 0 ] == dummy_series[ key ].index[ date_offset ]
 
             else:
 
