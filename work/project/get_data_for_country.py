@@ -57,7 +57,8 @@ def get_data_for_country( country, verbose = True ):
 
     for c in columns:
 
-        outcome_df[ np.isnan( outcome_df[ c ])] = 0
+        pass
+        #outcome_df[ np.isnan( outcome_df[ c ])] = 0
 
     if verbose:
 
@@ -71,7 +72,7 @@ def get_data_for_country( country, verbose = True ):
 
     for c in columns:
 
-        measure_df[ np.isnan( measure_df[ c ])] = 0
+        measure_df[ c ][ np.isnan( measure_df[ c ])] = 0
 
     # Oxford measures
 
