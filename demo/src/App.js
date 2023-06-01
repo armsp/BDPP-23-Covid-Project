@@ -3,35 +3,129 @@ import React from 'react'
 import { VegaLite } from 'react-vega'
 
 const spec = {
-  width: 400,
-  height: 200,
-  mark: 'bar',
-  encoding: {
-    x: { field: 'a', type: 'ordinal' },
-    y: { field: 'b', type: 'quantitative' },
+  "$schema": "https://vega.github.io/schema/vega-lite/v4.17.0.json",
+  "config": {
+    "view": {
+      "continuousHeight": 300,
+      "continuousWidth": 400
+    }
   },
-  data: { name: 'table' }, // note: vega-lite data attribute is a plain object instead of an array
-}
-
-const barData = {
-  table: [
-    { a: 'A', b: 28 },
-    { a: 'B', b: 55 },
-    { a: 'C', b: 43 },
-    { a: 'D', b: 91 },
-    { a: 'E', b: 81 },
-    { a: 'F', b: 53 },
-    { a: 'G', b: 19 },
-    { a: 'H', b: 87 },
-    { a: 'I', b: 52 },
+  "transform": [
+    {
+      "filter": {
+        "selection": "Country"
+      }
+    }
   ],
+  "vconcat": [
+    {
+      "data": {
+        "url": "https://raw.githubusercontent.com/armsp/BDPP-23-Covid-Project/cra-demo/demo/src/data/usa_swe_deu_covid.csv"
+      },
+      "encoding": {
+        "color": {
+          "field": "iso_code",
+          "type": "nominal"
+        },
+        "x": {
+          "field": "date",
+          "type": "temporal"
+        },
+        "y": {
+          "field": "new_cases_smoothed_per_million",
+          "type": "quantitative"
+        }
+      },
+      "height": 300,
+      "mark": "bar",
+      "selection": {
+        "Country": {
+          "bind": {
+            "input": "select",
+            "options": [
+              "DEU",
+              "SWE",
+              "USA"
+            ]
+          },
+          "fields": [
+            "iso_code"
+          ],
+          "init": {
+            "iso_code": "USA"
+          },
+          "type": "single"
+        }
+      },
+      "transform": [
+        {
+          "filter": {
+            "selection": "Country"
+          }
+        }
+      ],
+      "width": 1400
+    },
+    {
+      "data": {
+        "url": "https://raw.githubusercontent.com/armsp/BDPP-23-Covid-Project/cra-demo/demo/src/data/usa_swe_deu_c6.csv"
+      },
+      "encoding": {
+        "color": {
+          "field": "iso_code",
+          "type": "nominal"
+        },
+        "x": {
+          "field": "date",
+          "type": "temporal"
+        },
+        "y": {
+          "field": "c6",
+          "type": "quantitative"
+        }
+      },
+      "height": 50,
+      "mark": {
+        "interpolate": "step-after",
+        "line": true,
+        "type": "area"
+      },
+      "selection": {
+        "Country": {
+          "bind": {
+            "input": "select",
+            "options": [
+              "DEU",
+              "SWE",
+              "USA"
+            ]
+          },
+          "fields": [
+            "iso_code"
+          ],
+          "init": {
+            "iso_code": "USA"
+          },
+          "type": "single"
+        }
+      },
+      "transform": [
+        {
+          "filter": {
+            "selection": "Country"
+          }
+        }
+      ],
+      "width": 1400
+    }
+  ]
 }
 
 
 function App() {
   return (
     <div className="App">
-     <VegaLite spec={spec} data={barData} />
+     <VegaLite spec={spec} />
     </div>
   );
 }
