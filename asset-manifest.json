@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/BDPP-23-Covid-Project/static/css/main.073c9b0a.css",
+    "main.js": "/BDPP-23-Covid-Project/static/js/main.7b5f9f22.js",
+    "index.html": "/BDPP-23-Covid-Project/index.html",
+    "main.073c9b0a.css.map": "/BDPP-23-Covid-Project/static/css/main.073c9b0a.css.map",
+    "main.7b5f9f22.js.map": "/BDPP-23-Covid-Project/static/js/main.7b5f9f22.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.073c9b0a.css",
+    "static/js/main.7b5f9f22.js"
+  ]
+}
