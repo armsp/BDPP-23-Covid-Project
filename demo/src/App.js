@@ -117,6 +117,162 @@ const spec = {
         }
       ],
       "width": 1400
+    },
+    {
+      "data": {
+        "url": "https://raw.githubusercontent.com/armsp/BDPP-23-Covid-Project/cra-demo/demo/src/data/usa_swe_deu_c7.csv"
+      },
+      "encoding": {
+        "color": {
+          "field": "iso_code",
+          "type": "nominal"
+        },
+        "x": {
+          "field": "date",
+          "type": "temporal"
+        },
+        "y": {
+          "field": "c7",
+          "type": "quantitative"
+        }
+      },
+      "height": 50,
+      "mark": {
+        "interpolate": "step-after",
+        "line": true,
+        "type": "area"
+      },
+      "selection": {
+        "Country": {
+          "bind": {
+            "input": "select",
+            "options": [
+              "DEU",
+              "SWE",
+              "USA"
+            ]
+          },
+          "fields": [
+            "iso_code"
+          ],
+          "init": {
+            "iso_code": "USA"
+          },
+          "type": "single"
+        }
+      },
+      "transform": [
+        {
+          "filter": {
+            "selection": "Country"
+          }
+        }
+      ],
+      "width": 1400
+    },
+    {
+      "data": {
+        "url": "https://raw.githubusercontent.com/armsp/BDPP-23-Covid-Project/cra-demo/demo/src/data/usa_swe_deu_c8.csv"
+      },
+      "encoding": {
+        "color": {
+          "field": "iso_code",
+          "type": "nominal"
+        },
+        "x": {
+          "field": "date",
+          "type": "temporal"
+        },
+        "y": {
+          "field": "c8",
+          "type": "quantitative"
+        }
+      },
+      "height": 50,
+      "mark": {
+        "interpolate": "step-after",
+        "line": true,
+        "type": "area"
+      },
+      "selection": {
+        "Country": {
+          "bind": {
+            "input": "select",
+            "options": [
+              "DEU",
+              "SWE",
+              "USA"
+            ]
+          },
+          "fields": [
+            "iso_code"
+          ],
+          "init": {
+            "iso_code": "USA"
+          },
+          "type": "single"
+        }
+      },
+      "transform": [
+        {
+          "filter": {
+            "selection": "Country"
+          }
+        }
+      ],
+      "width": 1400
+    },
+    {
+      "data": {
+        "url": "https://raw.githubusercontent.com/armsp/BDPP-23-Covid-Project/cra-demo/demo/src/data/usa_swe_deu_h6.csv"
+      },
+      "encoding": {
+        "color": {
+          "field": "iso_code",
+          "type": "nominal"
+        },
+        "x": {
+          "field": "date",
+          "type": "temporal"
+        },
+        "y": {
+          "field": "h6",
+          "type": "quantitative"
+        }
+      },
+      "height": 50,
+      "mark": {
+        "interpolate": "step-after",
+        "line": true,
+        "type": "area"
+      },
+      "selection": {
+        "Country": {
+          "bind": {
+            "input": "select",
+            "options": [
+              "DEU",
+              "SWE",
+              "USA"
+            ]
+          },
+          "fields": [
+            "iso_code"
+          ],
+          "init": {
+            "iso_code": "USA"
+          },
+          "type": "single"
+        }
+      },
+      "transform": [
+        {
+          "filter": {
+            "selection": "Country"
+          }
+        }
+      ],
+      "width": 1400
     }
   ]
 }
@@ -125,6 +281,9 @@ const spec = {
 function App() {
   return (
     <div className="App">
+      <header className='App App-header'>
+      Post-Evaluation of Government-Level COVID-19 Measures​
+      </header>
      <VegaLite spec={spec} />
     </div>
   );
