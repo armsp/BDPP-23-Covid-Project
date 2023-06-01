@@ -1,13 +1,13 @@
 {
   "files": {
-    "main.css": "/BDPP-23-Covid-Project/static/css/main.073c9b0a.css",
-    "main.js": "/BDPP-23-Covid-Project/static/js/main.7b5f9f22.js",
+    "main.css": "/BDPP-23-Covid-Project/static/css/main.bca2956b.css",
+    "main.js": "/BDPP-23-Covid-Project/static/js/main.cb1a299a.js",
     "index.html": "/BDPP-23-Covid-Project/index.html",
-    "main.073c9b0a.css.map": "/BDPP-23-Covid-Project/static/css/main.073c9b0a.css.map",
-    "main.7b5f9f22.js.map": "/BDPP-23-Covid-Project/static/js/main.7b5f9f22.js.map"
+    "main.bca2956b.css.map": "/BDPP-23-Covid-Project/static/css/main.bca2956b.css.map",
+    "main.cb1a299a.js.map": "/BDPP-23-Covid-Project/static/js/main.cb1a299a.js.map"
   },
   "entrypoints": [
-    "static/css/main.073c9b0a.css",
-    "static/js/main.7b5f9f22.js"
+    "static/css/main.bca2956b.css",
+    "static/js/main.cb1a299a.js"
   ]
 }
