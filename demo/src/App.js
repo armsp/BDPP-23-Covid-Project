@@ -3,18 +3,48 @@ import React from 'react'
 import { VegaLite } from 'react-vega'
 
 const spec = {
-  "$schema": "https://vega.github.io/schema/vega-lite/v4.17.0.json",
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.8.0.json",
   "config": {
     "view": {
       "continuousHeight": 300,
-      "continuousWidth": 400
+      "continuousWidth": 300
     }
   },
-  "transform": [
+  "params": [
     {
-      "filter": {
-        "selection": "Country"
-      }
+      "bind": {
+        "input": "select",
+        "name": "Country",
+        "options": [
+          "DEU",
+          "SWE",
+          "USA"
+        ]
+      },
+      "name": "param_13",
+      "select": {
+        "fields": [
+          "iso_code"
+        ],
+        "type": "point"
+      },
+      "views": [
+        "view_26",
+        "view_27"
+      ]
+    },
+    {
+      "name": "param_12",
+      "select": {
+        "encodings": [
+          "x"
+        ],
+        "type": "interval",
+        "zoom": false
+      },
+      "views": [
+        "view_27"
+      ]
     }
   ],
   "vconcat": [
@@ -37,30 +67,19 @@ const spec = {
         }
       },
       "height": 300,
-      "mark": "bar",
-      "selection": {
-        "Country": {
-          "bind": {
-            "input": "select",
-            "options": [
-              "DEU",
-              "SWE",
-              "USA"
-            ]
-          },
-          "fields": [
-            "iso_code"
-          ],
-          "init": {
-            "iso_code": "USA"
-          },
-          "type": "single"
-        }
+      "mark": {
+        "type": "bar"
       },
+      "name": "view_26",
       "transform": [
         {
           "filter": {
-            "selection": "Country"
+            "param": "param_13"
+          }
+        },
+        {
+          "filter": {
+            "param": "param_12"
           }
         }
       ],
@@ -90,185 +109,11 @@ const spec = {
         "line": true,
         "type": "area"
       },
-      "selection": {
-        "Country": {
-          "bind": {
-            "input": "select",
-            "options": [
-              "DEU",
-              "SWE",
-              "USA"
-            ]
-          },
-          "fields": [
-            "iso_code"
-          ],
-          "init": {
-            "iso_code": "USA"
-          },
-          "type": "single"
-        }
-      },
+      "name": "view_27",
       "transform": [
         {
           "filter": {
-            "selection": "Country"
-          }
-        }
-      ],
-      "width": 1400
-    },
-    {
-      "data": {
-        "url": "https://raw.githubusercontent.com/armsp/BDPP-23-Covid-Project/cra-demo/demo/src/data/usa_swe_deu_c7.csv"
-      },
-      "encoding": {
-        "color": {
-          "field": "iso_code",
-          "type": "nominal"
-        },
-        "x": {
-          "field": "date",
-          "type": "temporal"
-        },
-        "y": {
-          "field": "c7",
-          "type": "quantitative"
-        }
-      },
-      "height": 50,
-      "mark": {
-        "interpolate": "step-after",
-        "line": true,
-        "type": "area"
-      },
-      "selection": {
-        "Country": {
-          "bind": {
-            "input": "select",
-            "options": [
-              "DEU",
-              "SWE",
-              "USA"
-            ]
-          },
-          "fields": [
-            "iso_code"
-          ],
-          "init": {
-            "iso_code": "USA"
-          },
-          "type": "single"
-        }
-      },
-      "transform": [
-        {
-          "filter": {
-            "selection": "Country"
-          }
-        }
-      ],
-      "width": 1400
-    },
-    {
-      "data": {
-        "url": "https://raw.githubusercontent.com/armsp/BDPP-23-Covid-Project/cra-demo/demo/src/data/usa_swe_deu_c8.csv"
-      },
-      "encoding": {
-        "color": {
-          "field": "iso_code",
-          "type": "nominal"
-        },
-        "x": {
-          "field": "date",
-          "type": "temporal"
-        },
-        "y": {
-          "field": "c8",
-          "type": "quantitative"
-        }
-      },
-      "height": 50,
-      "mark": {
-        "interpolate": "step-after",
-        "line": true,
-        "type": "area"
-      },
-      "selection": {
-        "Country": {
-          "bind": {
-            "input": "select",
-            "options": [
-              "DEU",
-              "SWE",
-              "USA"
-            ]
-          },
-          "fields": [
-            "iso_code"
-          ],
-          "init": {
-            "iso_code": "USA"
-          },
-          "type": "single"
-        }
-      },
-      "transform": [
-        {
-          "filter": {
-            "selection": "Country"
-          }
-        }
-      ],
-      "width": 1400
-    },
-    {
-      "data": {
-        "url": "https://raw.githubusercontent.com/armsp/BDPP-23-Covid-Project/cra-demo/demo/src/data/usa_swe_deu_h6.csv"
-      },
-      "encoding": {
-        "color": {
-          "field": "iso_code",
-          "type": "nominal"
-        },
-        "x": {
-          "field": "date",
-          "type": "temporal"
-        },
-        "y": {
-          "field": "h6",
-          "type": "quantitative"
-        }
-      },
-      "height": 50,
-      "mark": {
-        "interpolate": "step-after",
-        "line": true,
-        "type": "area"
-      },
-      "selection": {
-        "Country": {
-          "bind": {
-            "input": "select",
-            "options": [
-              "DEU",
-              "SWE",
-              "USA"
-            ]
-          },
-          "fields": [
-            "iso_code"
-          ],
-          "init": {
-            "iso_code": "USA"
-          },
-          "type": "single"
-        }
-      },
-      "transform": [
-        {
-          "filter": {
-            "selection": "Country"
+            "param": "param_13"
           }
         }
       ],
