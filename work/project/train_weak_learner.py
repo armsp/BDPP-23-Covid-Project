@@ -23,7 +23,7 @@ def train_weak_learner( dataframes, length_l = 1, lag = 0, length_r = 1, linear_
 
     def get_n_samples( df ):
 
-        return df.shape[ 0 ] - length_r + 1 - lag - length_r
+        return df.shape[ 0 ] - length_l - lag - length_r + 1
 
     n_samples_total = sum([ get_n_samples( df ) for df in dataframes ])
 
@@ -61,7 +61,7 @@ def train_weak_learner( dataframes, length_l = 1, lag = 0, length_r = 1, linear_
         right = df.iloc[ i + length_l + lag : i + length_l + lag + length_r, :n_outcomes ] # assume outcomes are the first columns
         
         assert ( length_l, d ) == left.shape, f"got { left.shape } but expected { length_l, d }"
-        assert ( length_r, n_outcomes ) == right.shape, f"got { right.shape } but expected { length_r, n_outcomes }"
+        assert ( length_r, n_outcomes ) == right.shape, f"got { right.shape } but expected { length_r, n_outcomes } for slice ({ i + length_l + lag }:{ i + length_l + lag + length_r }) and df.shape { df.shape }"
         return left, right
     
     L = np.zeros(( n_samples_total, length_l, d ))
@@ -128,3 +128,4 @@ def train_weak_learner( dataframes, length_l = 1, lag = 0, length_r = 1, linear_
         linear_operator = linear_operator,
         weight = weight
     )
+    
