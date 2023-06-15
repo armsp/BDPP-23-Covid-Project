@@ -9,6 +9,10 @@ We assume you have `pipenv` and `python 3.9` installed on your machine (or [virt
 4. To launch jupyter lab, run `jupyter-lab -y --NotebookApp.token='' --ip='*' --port=8888 --allow-root`. Most of these keyword arguments are required to run smoothly in docker, so if you know better, you might get away without all of them.
 6. If not already, open `localhost:8888` for jupyter lab.
 
+## Server
+
+In a second pipenv shell, run `is_server=1 watchmedo auto-restart -p "server.py" -R python3 -- server.py` for an autoreloading server (think nodemon).
+
 ## Git
 
 Before you commit anything with git, make sure you are not committing any artifact files by editing the local `.gitignore`.

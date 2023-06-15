@@ -12,6 +12,7 @@ scikit-learn = "*"
 tqdm = "*"
 flask-socketio = "*"
 eventlet = "*"
+watchdog = "*"
 
 [dev-packages]
 
