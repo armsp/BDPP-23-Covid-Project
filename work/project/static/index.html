@@ -10,8 +10,11 @@
 
 body { font: 12px Arial;}
 
+svg {
+    display: block;
+}
+
 path { 
-    /*stroke: steelblue;*/
     stroke-width: 2;
     fill: none;
 }
@@ -28,264 +31,42 @@ path {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script>
 
 <script type="text/javascript" charset="utf-8">
-    var socket = io();
+    socket = io();
 </script>
 
 <!-- load the d3.js library -->    
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/6.7.0/d3.min.js"></script>
 
-<script>
+<script src="./outcome_graph.js"></script>
 
-// Set the dimensions of the canvas / graph
-var margin = {top: 30, right: 20, bottom: 30, left: 50},
-    width = 800 - margin.left - margin.right,
-    height = 270 - margin.top - margin.bottom;
+<script type="text/javascript">
 
-// Parse the date / time
-var parseDate = d3.timeParse("%Y-%m-%d");
+    const graphs = [ ];    
 
-// Set the ranges
-var x = d3.scaleTime().range([0, width]);
-var y = d3.scaleLinear().range([height, 0]);
+    // Your data
+    var contries = ["Germany", "Switzerland" ];
 
-// Define the axes
-var xAxis = d3.axisBottom( ).scale(x)
-    .ticks(20);
+    // Select the container where you want to add the dropdown
+    var select = d3.select("body")  // change "body" to your container's ID or class
+      .append("select")
+      .attr("class", "select")      // add any classes you need
+      .on("change", onchange);      // specify the function to run when an option is selected
 
-var yAxis = d3.axisLeft( ).scale(y)
-    .ticks(5);
+    // Add options to the dropdown
+    select.selectAll("option")
+      .data(contries)                // bind your data
+      .join( "option" )
+      .text(function (d) { return d; });  // set the text of each option to the data value
 
-// Define the line
-var valueline = d3.line()
-    .x(function(d) { return x(d.date); })
-    .y(function(d) { return y(d.close); });
-    
-// Adds the svg canvas
-var svg = d3.select("body")
-    .append("svg")
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom)
-    .append("g")
-        .attr("transform", 
-              "translate(" + margin.left + "," + margin.top + ")");
-
-let handles = [ ];
-let data = [ ];
-
-let selected_handle = null;
-
-function set_selected( handle ) {
-
-    if( selected_handle ) d3.select(selected_handle.el).attr("stroke", "none");
-    selected_handle = handle;
-    if( selected_handle) d3.select(selected_handle.el).attr("stroke", "black");
-    update_data_hard( );
-}
-
-window.addEventListener('keydown', function(event) {
-  if (event.key === 'Escape' || event.key == "x" || event.key == "Backspace") {
-    if( selected_handle ) {
-
-        handles = handles.filter( h => h != selected_handle.d );
-        set_selected( null );
-        update_handles( );
-    }
-  }
-});
-
-//amounts to 50 days of effective radius
-weight_radius = 50 * ( 1000 * 60 * 60 * 24 );
-
-function weight_fn( d, date ) {
-
-    return Math.exp( - Math.pow(( d.date - date ) / weight_radius, 2 ));
-}
-
-const drag = ( _ => {
-
-    let start = null;
-
-    function dragstarted( event, d ) {
-        d3.select(this).attr("stroke", "yellow");
-        start = { date: x.invert( d.x ), close: y.invert( d.y ), data: data.map( d => ({ ...d })) /*deep copy*/ };
-        set_selected({ el: this, d });
+    // Function to run when an option is selected
+    function onchange() {
+      var selectedOption = d3.select("body").select("select").property("value");
+      // Do something with the selected option
+      graphs.forEach( g => g.set_country( selectedOption ));
     }
 
-    function dragged(event, d) {
-        d3.select(this).raise().attr("cy", d.y = event.y); //do not set x        
-
-        const date = x.invert( d.x );
-        const close = y.invert( d.y );
-        const delta = { date: date - start.date, close: close - start.close };
-        const weights = start.data.map(( d, i ) => weight_fn( d, date ));
-        data = start.data.map(( d, i ) => ({ date: d.date, close: d.close + weights[ i ] * delta.close }));
-        data.forEach( d => d.close = Math.max( d.close, 0 ));
-        update_data_hard( );
-
-        handles.forEach( snap_to_line );
-        update_handles( );
-    }
-
-    function dragended( event, d ) {
-        d3.select(this).attr("stroke", null);
-        set_selected({ el: this, d });
-    }
-
-    return d3.drag()
-      .on("start", dragstarted)
-      .on("drag", dragged)
-      .on("end", dragended);
-
-})( );
-
-function update_handles( ) {
-
-    svg.selectAll("circle")
-    .data(handles)
-    .join("circle")
-      .attr("cx", d => d.x)
-      .attr("cy", d => d.y)
-      .attr("r", 7)
-      .attr("fill", "steelblue" )
-      .call(drag)
-}
-
-function snap_to_line( d ) {
-
-    const date = x.invert( d.x );
-
-    // Find the data point that has the closest date to the target date
-    let closestDataPoint = data.reduce((a, b) => Math.abs(b.date - date) < Math.abs(a.date - date) ? b : a);
-
-    // Get the y-value
-    d.y = y( closestDataPoint.close );
-}
-
-socket.emit( "get_data", "Germany", callback = csv => {
-
-    data = d3.csvParse( csv );
-
-    data.forEach(function(d) {
-        d.date = parseDate(d.date);
-        d.close = +d.close;
-    });
-
-    // Scale the range of the data
-    x.domain(d3.extent(data, function(d) { return d.date; }));
-    y.domain([0, d3.max(data, function(d) { return d.close; })]);
-
-    /*
-    // Add the valueline path.
-    const line = svg.append("path")
-        .attr("class", "line")
-        .attr("d", valueline(data));
-    */
-
-    line = svg.append( "g" );
-    // Select the SVG and append a 'g' element for each line segment
-
-    const bbox = line.node().getBBox();
-
-    svg.append( "rect" )
-        .attr( "x", bbox.x )
-        .attr( "y", bbox.y )
-        .attr("width", bbox.width )
-        .attr("height", bbox.height )
-        .attr("fill", "none")
-        .attr("stroke", "none")
-        .attr("pointer-events", "all")
-        .on("click", function(event) { // d3 v6 uses event as first argument
-            var coordinates = d3.pointer(event, svg.node());
-            
-            const d = { x: coordinates[ 0 ], y: coordinates[ 1 ], index: handles.length };
-            snap_to_line( d );
-            handles.push( d );
-            update_handles( );
-        });
-
-    // Add the X Axis
-    svg.append("g")
-        .attr("class", "x axis")
-        .attr("transform", "translate(0," + height + ")")
-        .call(xAxis);
-
-    // Add the Y Axis
-    svg.append("g")
-        .attr("class", "y axis")
-        .call(yAxis);
-
-    update_data_hard( );
-});
-
-// Create a color scale
-var colorScale = d3.scaleLinear()
-    .domain([0, 1])  // replace with appropriate domain
-    .range(["steelblue", "black"]);  // replace with your own colors
-
-function update_data_hard( ) {
-
-    // Scale the range of the data again 
-    x.domain(d3.extent(data, function(d) { return d.date; }));
-    y.domain([0, d3.max(data, function(d) { return d.close; })]);
-
-    // Select the section we want to apply our changes to
-    var svg = d3.select("body");
-
-    // Make the changes
-    line.selectAll("path")   // change the line
-        .data(data.slice(0, -1))  // exclude the last point, because it has no next point
-        .join( "path" )
-        .attr( "class", "line" )
-        .attr("d", function(d, i) {
-            // Create an array of the current point and the next point
-            var points = [d, data[i+1]];
-            return valueline(points);
-        })
-        .attr("stroke", function(d, i) {
-            
-            // Use the color scale to get a color for this distance
-            const weight = selected_handle ? weight_fn( d, x.invert( selected_handle.d.x )) : 0;
-            return colorScale( weight );
-        });
-
-    //update bounding box
-    const bbox = line.node().getBBox();
-
-    svg.selectAll( "rect" )
-        .attr( "x", bbox.x )
-        .attr( "y", bbox.y )
-        .attr("width", bbox.width )
-        .attr("height", bbox.height );
-
-    svg.select(".x.axis") // change the x axis
-        .call(xAxis);
-    svg.select(".y.axis") // change the y axis
-        .call(yAxis);
-}
-
-/*
-function update_data( ) {
-
-    // Scale the range of the data again 
-    x.domain(d3.extent(data, function(d) { return d.date; }));
-    y.domain([0, d3.max(data, function(d) { return d.close; })]);
-
-    // Select the section we want to apply our changes to
-    var svg = d3.select("body").transition();
-
-    // Make the changes
-    svg.select(".line")   // change the line
-        .duration(750)
-        .attr("d", valueline(data));
-    svg.select(".x.axis") // change the x axis
-        .duration(750)
-        .call(xAxis);
-    svg.select(".y.axis") // change the y axis
-        .duration(750)
-        .call(yAxis);
-}
-*/
-
+    graphs.push( outcome_graph( ));
+    graphs.push( outcome_graph( ));
 </script>
 </body>
 </html>
