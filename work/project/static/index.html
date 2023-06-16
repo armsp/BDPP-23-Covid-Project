@@ -31,40 +31,32 @@ path {
     var socket = io();
 </script>
 
-
-<div id="option">
-    <input name="updateButton" 
-           type="button" 
-           value="Update" 
-           onclick="updateData()" />
-</div>
-
 <!-- load the d3.js library -->    
-<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/6.7.0/d3.min.js"></script>
 
 <script>
 
 // Set the dimensions of the canvas / graph
 var margin = {top: 30, right: 20, bottom: 30, left: 50},
-    width = 600 - margin.left - margin.right,
+    width = 800 - margin.left - margin.right,
     height = 270 - margin.top - margin.bottom;
 
 // Parse the date / time
-var parseDate = d3.time.format("%Y-%m-%d").parse;
+var parseDate = d3.timeParse("%Y-%m-%d");
 
 // Set the ranges
-var x = d3.time.scale().range([0, width]);
-var y = d3.scale.linear().range([height, 0]);
+var x = d3.scaleTime().range([0, width]);
+var y = d3.scaleLinear().range([height, 0]);
 
 // Define the axes
-var xAxis = d3.svg.axis().scale(x)
-    .orient("bottom").ticks(20);
+var xAxis = d3.axisBottom( ).scale(x)
+    .ticks(20);
 
-var yAxis = d3.svg.axis().scale(y)
-    .orient("left").ticks(5);
+var yAxis = d3.axisLeft( ).scale(y)
+    .ticks(5);
 
 // Define the line
-var valueline = d3.svg.line()
+var valueline = d3.line()
     .x(function(d) { return x(d.date); })
     .y(function(d) { return y(d.close); });
     
@@ -77,9 +69,98 @@ var svg = d3.select("body")
         .attr("transform", 
               "translate(" + margin.left + "," + margin.top + ")");
 
+let handles = [ ];
+let data = [ ];
+
+let selected_handle = null;
+
+function set_selected( handle ) {
+
+    if( selected_handle ) d3.select(selected_handle.el).attr("stroke", "none");
+    selected_handle = handle;
+    if( selected_handle) d3.select(selected_handle.el).attr("stroke", "black");
+}
+
+window.addEventListener('keydown', function(event) {
+  if (event.key === 'Escape') {
+    if( selected_handle ) {
+
+        handles = handles.filter( h => h != selected_handle.d );
+        set_selected( null );
+        update_handles( );
+    }
+  }
+});
+
+const drag = ( _ => {
+
+    let start = null;
+
+    function dragstarted( event, d ) {
+        d3.select(this).attr("stroke", "yellow");
+        start = { date: x.invert( d.x ), close: y.invert( d.y ), data: data.map( d => ({ ...d })) /*deep copy*/ };
+    }
+
+    function dragged(event, d) {
+        d3.select(this).raise().attr("cy", d.y = event.y); //do not set x
+        console.log( x.invert( event.x ));
+        
+
+        const date = x.invert( d.x );
+        const close = y.invert( d.y );
+        const delta = { date: date - start.date, close: close - start.close };
+        console.log( delta );
+
+        //amounts to 50 days of effective radius
+        weight_radius = 50 * ( 1000 * 60 * 60 * 24 );
+
+        const distances = start.data.map(( d, i ) => d.date - date );
+        const weights = start.data.map(( d, i ) => Math.exp( - Math.pow(( d.date - date ) / weight_radius, 2 )));
+        data = start.data.map(( d, i ) => ({ date: d.date, close: d.close + weights[ i ] * delta.close }));
+        update_data_hard( );
+
+        handles.forEach( snap_to_line );
+        update_handles( );
+    }
+
+    function dragended( event, d ) {
+        d3.select(this).attr("stroke", null);
+        set_selected({ el: this, d });
+    }
+
+    return d3.drag()
+      .on("start", dragstarted)
+      .on("drag", dragged)
+      .on("end", dragended);
+
+})( );
+
+function update_handles( ) {
+
+    svg.selectAll("circle")
+    .data(handles)
+    .join("circle")
+      .attr("cx", d => d.x)
+      .attr("cy", d => d.y)
+      .attr("r", 7)
+      .attr("fill", "steelblue" )
+      .call(drag)
+}
+
+function snap_to_line( d ) {
+
+    const date = x.invert( d.x );
+
+    // Find the data point that has the closest date to the target date
+    let closestDataPoint = data.reduce((a, b) => Math.abs(b.date - date) < Math.abs(a.date - date) ? b : a);
+
+    // Get the y-value
+    d.y = y( closestDataPoint.close );
+}
+
 socket.emit( "get_data", "Germany", callback = csv => {
 
-    const data = d3.csv.parse( csv );
+    data = d3.csvParse( csv );
 
     data.forEach(function(d) {
         d.date = parseDate(d.date);
@@ -91,9 +172,28 @@ socket.emit( "get_data", "Germany", callback = csv => {
     y.domain([0, d3.max(data, function(d) { return d.close; })]);
 
     // Add the valueline path.
-    svg.append("path")
+    const line = svg.append("path")
         .attr("class", "line")
         .attr("d", valueline(data));
+
+    const bbox = line.node().getBBox();
+
+    svg.append( "rect" )
+    .attr( "x", bbox.x )
+    .attr( "y", bbox.y )
+    .attr("width", bbox.width )
+    .attr("height", bbox.height )
+    .attr("fill", "none")
+    .attr("stroke", "none")
+    .attr("pointer-events", "all")
+    .on("click", function(event) { // d3 v6 uses event as first argument
+        var coordinates = d3.pointer(event, svg.node());
+        console.log(`Mouse coordinates: x = ${coordinates[0]}, y = ${coordinates[1]}`);
+        const d = { x: coordinates[ 0 ], y: coordinates[ 1 ], index: handles.length };
+        snap_to_line( d );
+        handles.push( d );
+        update_handles( );
+    });
 
     // Add the X Axis
     svg.append("g")
@@ -107,37 +207,43 @@ socket.emit( "get_data", "Germany", callback = csv => {
         .call(yAxis);
 });
 
-// ** Update data section (Called from the onclick)
-function updateData() {
+function update_data_hard( ) {
 
-    socket.emit( "get_data", "Switzerland", callback = csv => {
+    // Scale the range of the data again 
+    x.domain(d3.extent(data, function(d) { return d.date; }));
+    y.domain([0, d3.max(data, function(d) { return d.close; })]);
 
-        const data = d3.csv.parse( csv );
+    // Select the section we want to apply our changes to
+    var svg = d3.select("body");
 
-        data.forEach(function(d) {
-            d.date = parseDate(d.date);
-            d.close = +d.close;
-        });
+    // Make the changes
+    svg.select(".line")   // change the line
+        .attr("d", valueline(data));
+    svg.select(".x.axis") // change the x axis
+        .call(xAxis);
+    svg.select(".y.axis") // change the y axis
+        .call(yAxis);
+}
 
-        // Scale the range of the data again 
-        x.domain(d3.extent(data, function(d) { return d.date; }));
-        y.domain([0, d3.max(data, function(d) { return d.close; })]);
+function update_data( ) {
 
-        // Select the section we want to apply our changes to
-        var svg = d3.select("body").transition();
+    // Scale the range of the data again 
+    x.domain(d3.extent(data, function(d) { return d.date; }));
+    y.domain([0, d3.max(data, function(d) { return d.close; })]);
 
-        // Make the changes
-        svg.select(".line")   // change the line
-            .duration(750)
-            .attr("d", valueline(data));
-        svg.select(".x.axis") // change the x axis
-            .duration(750)
-            .call(xAxis);
-        svg.select(".y.axis") // change the y axis
-            .duration(750)
-            .call(yAxis);
+    // Select the section we want to apply our changes to
+    var svg = d3.select("body").transition();
 
-    });
+    // Make the changes
+    svg.select(".line")   // change the line
+        .duration(750)
+        .attr("d", valueline(data));
+    svg.select(".x.axis") // change the x axis
+        .duration(750)
+        .call(xAxis);
+    svg.select(".y.axis") // change the y axis
+        .duration(750)
+        .call(yAxis);
 }
 
 </script>
