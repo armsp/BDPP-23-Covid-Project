@@ -82,7 +82,7 @@ function set_selected( handle ) {
 }
 
 window.addEventListener('keydown', function(event) {
-  if (event.key === 'Escape') {
+  if (event.key === 'Escape' || event.key == "x" || event.key == "Backspace") {
     if( selected_handle ) {
 
         handles = handles.filter( h => h != selected_handle.d );
@@ -117,6 +117,7 @@ const drag = ( _ => {
         const distances = start.data.map(( d, i ) => d.date - date );
         const weights = start.data.map(( d, i ) => Math.exp( - Math.pow(( d.date - date ) / weight_radius, 2 )));
         data = start.data.map(( d, i ) => ({ date: d.date, close: d.close + weights[ i ] * delta.close }));
+        data.forEach( d => d.close = Math.max( d.close, 0 ));
         update_data_hard( );
 
         handles.forEach( snap_to_line );
