@@ -11,7 +11,7 @@
 body { font: 12px Arial;}
 
 path { 
-    stroke: steelblue;
+    /*stroke: steelblue;*/
     stroke-width: 2;
     fill: none;
 }
@@ -79,6 +79,7 @@ function set_selected( handle ) {
     if( selected_handle ) d3.select(selected_handle.el).attr("stroke", "none");
     selected_handle = handle;
     if( selected_handle) d3.select(selected_handle.el).attr("stroke", "black");
+    update_data_hard( );
 }
 
 window.addEventListener('keydown', function(event) {
@@ -92,6 +93,14 @@ window.addEventListener('keydown', function(event) {
   }
 });
 
+//amounts to 50 days of effective radius
+weight_radius = 50 * ( 1000 * 60 * 60 * 24 );
+
+function weight_fn( d, date ) {
+
+    return Math.exp( - Math.pow(( d.date - date ) / weight_radius, 2 ));
+}
+
 const drag = ( _ => {
 
     let start = null;
@@ -99,23 +108,16 @@ const drag = ( _ => {
     function dragstarted( event, d ) {
         d3.select(this).attr("stroke", "yellow");
         start = { date: x.invert( d.x ), close: y.invert( d.y ), data: data.map( d => ({ ...d })) /*deep copy*/ };
+        set_selected({ el: this, d });
     }
 
     function dragged(event, d) {
-        d3.select(this).raise().attr("cy", d.y = event.y); //do not set x
-        console.log( x.invert( event.x ));
-        
+        d3.select(this).raise().attr("cy", d.y = event.y); //do not set x        
 
         const date = x.invert( d.x );
         const close = y.invert( d.y );
         const delta = { date: date - start.date, close: close - start.close };
-        console.log( delta );
-
-        //amounts to 50 days of effective radius
-        weight_radius = 50 * ( 1000 * 60 * 60 * 24 );
-
-        const distances = start.data.map(( d, i ) => d.date - date );
-        const weights = start.data.map(( d, i ) => Math.exp( - Math.pow(( d.date - date ) / weight_radius, 2 )));
+        const weights = start.data.map(( d, i ) => weight_fn( d, date ));
         data = start.data.map(( d, i ) => ({ date: d.date, close: d.close + weights[ i ] * delta.close }));
         data.forEach( d => d.close = Math.max( d.close, 0 ));
         update_data_hard( );
@@ -172,29 +174,34 @@ socket.emit( "get_data", "Germany", callback = csv => {
     x.domain(d3.extent(data, function(d) { return d.date; }));
     y.domain([0, d3.max(data, function(d) { return d.close; })]);
 
+    /*
     // Add the valueline path.
     const line = svg.append("path")
         .attr("class", "line")
         .attr("d", valueline(data));
+    */
+
+    line = svg.append( "g" );
+    // Select the SVG and append a 'g' element for each line segment
 
     const bbox = line.node().getBBox();
 
     svg.append( "rect" )
-    .attr( "x", bbox.x )
-    .attr( "y", bbox.y )
-    .attr("width", bbox.width )
-    .attr("height", bbox.height )
-    .attr("fill", "none")
-    .attr("stroke", "none")
-    .attr("pointer-events", "all")
-    .on("click", function(event) { // d3 v6 uses event as first argument
-        var coordinates = d3.pointer(event, svg.node());
-        console.log(`Mouse coordinates: x = ${coordinates[0]}, y = ${coordinates[1]}`);
-        const d = { x: coordinates[ 0 ], y: coordinates[ 1 ], index: handles.length };
-        snap_to_line( d );
-        handles.push( d );
-        update_handles( );
-    });
+        .attr( "x", bbox.x )
+        .attr( "y", bbox.y )
+        .attr("width", bbox.width )
+        .attr("height", bbox.height )
+        .attr("fill", "none")
+        .attr("stroke", "none")
+        .attr("pointer-events", "all")
+        .on("click", function(event) { // d3 v6 uses event as first argument
+            var coordinates = d3.pointer(event, svg.node());
+            
+            const d = { x: coordinates[ 0 ], y: coordinates[ 1 ], index: handles.length };
+            snap_to_line( d );
+            handles.push( d );
+            update_handles( );
+        });
 
     // Add the X Axis
     svg.append("g")
@@ -206,7 +213,14 @@ socket.emit( "get_data", "Germany", callback = csv => {
     svg.append("g")
         .attr("class", "y axis")
         .call(yAxis);
+
+    update_data_hard( );
 });
+
+// Create a color scale
+var colorScale = d3.scaleLinear()
+    .domain([0, 1])  // replace with appropriate domain
+    .range(["steelblue", "black"]);  // replace with your own colors
 
 function update_data_hard( ) {
 
@@ -218,14 +232,38 @@ function update_data_hard( ) {
     var svg = d3.select("body");
 
     // Make the changes
-    svg.select(".line")   // change the line
-        .attr("d", valueline(data));
+    line.selectAll("path")   // change the line
+        .data(data.slice(0, -1))  // exclude the last point, because it has no next point
+        .join( "path" )
+        .attr( "class", "line" )
+        .attr("d", function(d, i) {
+            // Create an array of the current point and the next point
+            var points = [d, data[i+1]];
+            return valueline(points);
+        })
+        .attr("stroke", function(d, i) {
+            
+            // Use the color scale to get a color for this distance
+            const weight = selected_handle ? weight_fn( d, x.invert( selected_handle.d.x )) : 0;
+            return colorScale( weight );
+        });
+
+    //update bounding box
+    const bbox = line.node().getBBox();
+
+    svg.selectAll( "rect" )
+        .attr( "x", bbox.x )
+        .attr( "y", bbox.y )
+        .attr("width", bbox.width )
+        .attr("height", bbox.height );
+
     svg.select(".x.axis") // change the x axis
         .call(xAxis);
     svg.select(".y.axis") // change the y axis
         .call(yAxis);
 }
 
+/*
 function update_data( ) {
 
     // Scale the range of the data again 
@@ -246,6 +284,7 @@ function update_data( ) {
         .duration(750)
         .call(yAxis);
 }
+*/
 
 </script>
 </body>
