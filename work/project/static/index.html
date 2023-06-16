@@ -37,26 +37,58 @@ path {
 <!-- load the d3.js library -->    
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/6.7.0/d3.min.js"></script>
 
-<script src="./outcome_graph.js"></script>
+<script src="./graph.js"></script>
 
 <script type="text/javascript">
 
     const graphs = [ ];    
 
     // Your data
-    var contries = ["Germany", "Switzerland" ];
+    let contries = [ ];
+
+    socket.emit( "get_countries", callback = c => {
+
+        contries = c;
+        update_countries( );
+    });
+
+    let columns = [ ];
+
+    socket.emit( "get_columns", callback = c => {
+
+        columns = c;
+        update_columns( );
+    });
+
+    function update_columns( ) {
+
+        columns.slice( 0, 3 ).forEach( c => {
+
+            graphs.push( graph( c, false ));
+        });
+
+        columns.slice( 3 ).forEach( c => {
+
+            graphs.push( graph( c, true ));
+        });
+    }
 
     // Select the container where you want to add the dropdown
-    var select = d3.select("body")  // change "body" to your container's ID or class
+    let select = d3.select("body")  // change "body" to your container's ID or class
       .append("select")
       .attr("class", "select")      // add any classes you need
       .on("change", onchange);      // specify the function to run when an option is selected
 
-    // Add options to the dropdown
-    select.selectAll("option")
-      .data(contries)                // bind your data
-      .join( "option" )
-      .text(function (d) { return d; });  // set the text of each option to the data value
+    function update_countries( ) {
+
+        // Add options to the dropdown
+        select.selectAll("option")
+          .data(contries)                // bind your data
+          .join( "option" )
+          .text(function (d) { return d; });  // set the text of each option to the data value
+    }
+
+    update_countries( );
 
     // Function to run when an option is selected
     function onchange() {
@@ -64,9 +96,6 @@ path {
       // Do something with the selected option
       graphs.forEach( g => g.set_country( selectedOption ));
     }
-
-    graphs.push( outcome_graph( ));
-    graphs.push( outcome_graph( ));
 </script>
 </body>
 </html>

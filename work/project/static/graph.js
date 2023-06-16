@@ -1,7 +1,7 @@
-function outcome_graph( ) {
+function graph( column, is_measure ) {
 
 // Set the dimensions of the canvas / graph
-const margin = {top: 30, right: 20, bottom: 30, left: 50},
+const margin = {top: 10, right: 20, bottom: 30, left: 50},
     width = 700 - margin.left - margin.right,
     height = 150 - margin.top - margin.bottom;
 
@@ -23,9 +23,14 @@ const yAxis = d3.axisLeft( ).scale(y)
 const valueline = d3.line()
     .x(function(d) { return x(d.date); })
     .y(function(d) { return y(d.close); });
-    
+
+const div = d3.select( "body" ).append( "div" );
+div.append( "p" )
+    .text( column.replaceAll( "_", " " ))
+    .style( "margin", 0 );
+
 // Adds the svg canvas
-const svg = d3.select("body")
+const svg = div
     .append("svg")
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
@@ -63,7 +68,7 @@ svg.append("g")
 // Create a color scale
 const colorScale = d3.scaleLinear()
     .domain([0, 1])  // replace with appropriate domain
-    .range(["steelblue", "black"]);  // replace with your own colors
+    .range(["steelblue", "orange"]);  // replace with your own colors
 
 let handles = [ ];
 let data = [ ];
@@ -74,7 +79,7 @@ function set_selected( handle ) {
 
     if( selected_handle ) d3.select(selected_handle.el).attr("stroke", "none");
     selected_handle = handle;
-    if( selected_handle) d3.select(selected_handle.el).attr("stroke", "black");
+    if( selected_handle) d3.select(selected_handle.el).attr("stroke", "orange");
     update_data_hard( );
 }
 
@@ -166,7 +171,7 @@ function update_data_hard( ) {
 
     // Scale the range of the data again 
     x.domain(d3.extent(data, function(d) { return d.date; }));
-    y.domain([0, d3.max(data, function(d) { return d.close; })]);
+    y.domain([0, Math.max( 1, d3.max(data, function(d) { return d.close; }))]);
 
     // Make the changes
     line.selectAll("path")   // change the line
@@ -190,9 +195,9 @@ function update_data_hard( ) {
 
     svg.selectAll( "rect" )
         .attr( "x", bbox.x )
-        .attr( "y", bbox.y )
-        .attr("width", bbox.width )
-        .attr("height", bbox.height );
+        .attr( "y", 0 )
+        .attr("width", width )
+        .attr("height", height )
 
     svg.select(".x.axis") // change the x axis
         .call(xAxis);
@@ -202,9 +207,9 @@ function update_data_hard( ) {
 
 function set_country( country ) {
 
-    socket.emit( "get_data", country, callback = csv => {
+    socket.emit( "get_data", country, callback = df => {
 
-        data = d3.csvParse( csv );
+        data = d3.csvParse( df[ column ]);
 
         data.forEach(function(d) {
 
@@ -212,6 +217,9 @@ function set_country( country ) {
             d.close = +d.close;
         });
 
+        handles = [ ];
+        set_selected( null );
+        update_handles( );
         update_data_hard( );
     });
 }

@@ -17,7 +17,7 @@ socketio = SocketIO(app)
 def load_data( country ):
 
     print( f"loading data for { country }" )
-    return get_data_for_country( country, verbose = False )
+    return get_data_for_country( country, verbose = False, categorical_as_dummy = False )
 
 @app.route('/')
 def serve_index():
@@ -29,10 +29,38 @@ def my_event(json):
     return "OK", 200
 
 @socketio.event
+def get_outcome_columns( ):
+    
+    return ['new_cases_smoothed_per_million', 'new_deaths_smoothed_per_million', 'weekly_hosp_admissions_per_million', ]
+
+@socketio.event
+def get_measure_columns( ):
+    
+    return ['new_vaccinations_smoothed_per_million',
+       'new_tests_smoothed_per_thousand', 'c6m_stay_at_home_requirements',
+       'c8ev_internationaltravel', 'h6m_facial_coverings',
+       'c4m_restrictions_on_gatherings']
+
+@socketio.event
+def get_columns( ):
+
+    return [ * get_outcome_columns( ), * get_measure_columns( )]
+
+@socketio.event
+def get_countries( ):
+    
+    return [ "Germany", "Switzerland", "Italy", "France", "Belgium", "United States", "Spain", "United Kingdom", "Malaysia", "South Korea", "Chile" ]
+
+@socketio.event
 def get_data( country ):
-    series = load_data( country ).new_cases_smoothed_per_million
-    series.name = "close"
-    return series.to_csv( )
+
+    def to_csv( s ):
+
+        s.name = "close"
+        return s.to_csv( )
+
+    df = load_data( country )
+    return { c: to_csv( df[ c ]) for c in df.columns }
 
 def main( ):
 

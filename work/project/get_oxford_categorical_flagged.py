@@ -11,7 +11,7 @@ import require
 import os
 get_oxford_df = require.single( "get_oxford_df" )
 
-def get_oxford_categorical_flagged( country, indicator, verbose = True ):
+def get_oxford_categorical_flagged( country, indicator, use_dummies = True, verbose = True ):
 
     series_file = f"data/{ indicator }.csv"
     flag_file = f"data/{ indicator.split( '_' )[ 0 ]}_flag.csv"
@@ -56,23 +56,30 @@ def get_oxford_categorical_flagged( country, indicator, verbose = True ):
 
         display( HTML( f"<h3>categorical non-zero values</h3><p>{ nnz_values }</p>" ))
 
-    dummy_series = { f"{ v }": ( masked_series == v ).astype( int ) for v in nnz_values }
-
-    if verbose:
-
-        display( HTML( f"<h3>categorical-dummy series</h3>" ))
-        
-        n = len( dummy_series )
-        fig, axs = plt.subplots( 1, n, figsize = ( 4 * n, 4 ))
-        
-        if( n > 1 ):
-        
-            axs = axs.ravel( )
-        
-        for i, ( v, series ) in enumerate( dummy_series.items( )):
-        
-            series.plot( title = v, ax = axs[ i ] if n > 1 else axs )
-        
-        plt.show( )
+    if use_dummies:
     
-    return dummy_series
+        dummy_series = { f"{ v }": ( masked_series == v ).astype( int ) for v in nnz_values }
+    
+        if verbose:
+    
+            display( HTML( f"<h3>categorical-dummy series</h3>" ))
+            
+            n = len( dummy_series )
+            fig, axs = plt.subplots( 1, n, figsize = ( 4 * n, 4 ))
+            
+            if( n > 1 ):
+            
+                axs = axs.ravel( )
+            
+            for i, ( v, series ) in enumerate( dummy_series.items( )):
+            
+                series.plot( title = v, ax = axs[ i ] if n > 1 else axs )
+            
+            plt.show( )
+        
+        return dummy_series
+
+    else:
+
+        return masked_series.fillna( 0 )
+
