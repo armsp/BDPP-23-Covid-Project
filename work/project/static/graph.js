@@ -125,6 +125,8 @@ const drag = ( _ => {
         
         if( is_categorical ) {
 
+            //insert handles for every value change at start?
+
             const orderer_to_sorter = f => ( a, b ) => f( a ) - f( b );
             const sorted = handles.sort( orderer_to_sorter( h => h.x ));
             
@@ -251,6 +253,24 @@ function set_country( country ) {
         set_selected( null );
         update_handles( );
         update_data_hard( );
+
+        if( is_categorical ) {
+
+            let last = -1;
+            data.forEach( d => {
+
+                if( last != d.close ) {
+
+                    const hd = { x: x( d.date ), y: y( d.close ), index: handles.length };
+                    snap_to_line( hd );
+                    handles.push( hd );
+                }
+
+                last = d.close;
+            });
+        }
+
+        update_handles( );
     });
 }
 
