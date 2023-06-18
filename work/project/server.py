@@ -44,7 +44,12 @@ def get_measure_columns( ):
 @socketio.event
 def get_columns( ):
 
-    return [ * get_outcome_columns( ), * get_measure_columns( )]
+    df = load_data( "Germany" )
+    return [ dict( 
+        name = c, 
+        is_measure = i >= 3,
+        is_categorical = i >= 3 and not c.startswith( "new" ),
+        n_categories = [ 3, 4, 4, 4 ][ i - 5 ] if i >= 3 and not c.startswith( "new" ) else 0 ) for i, c in enumerate( df.columns )]
 
 @socketio.event
 def get_countries( ):

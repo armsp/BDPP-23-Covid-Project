@@ -62,14 +62,9 @@ path {
 
     function update_columns( ) {
 
-        columns.slice( 0, 3 ).forEach( c => {
+        columns.forEach( col => {
 
-            graphs.push( graph( c, false ));
-        });
-
-        columns.slice( 3 ).forEach( c => {
-
-            graphs.push( graph( c, true ));
+            graphs.push( graph( col.name, { ...col }));
         });
     }
 

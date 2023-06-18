@@ -1,4 +1,4 @@
-function graph( column, is_measure ) {
+function graph( column, { is_measure, is_categorical, n_categories } = { }) {
 
 // Set the dimensions of the canvas / graph
 const margin = {top: 10, right: 20, bottom: 30, left: 50},
@@ -52,6 +52,7 @@ svg.append( "rect" )
         snap_to_line( d );
         handles.push( d );
         update_handles( );
+        select_newest_handle( );
     });
 
 // Add the X Axis
@@ -77,9 +78,10 @@ let selected_handle = null;
 
 function set_selected( handle ) {
 
-    if( selected_handle ) d3.select(selected_handle.el).attr("stroke", "none");
+    if( selected_handle ) selected_handle.d.selected = false;
     selected_handle = handle;
-    if( selected_handle) d3.select(selected_handle.el).attr("stroke", "orange");
+    if( selected_handle ) selected_handle.d.selected = true;
+    update_handles( );
     update_data_hard( );
 }
 
@@ -99,8 +101,9 @@ window.addEventListener('keydown', function(event) {
   }
 });
 
+const day_radius = ( 1000 * 60 * 60 * 24 );
 //amounts to 50 days of effective radius
-const weight_radius = 50 * ( 1000 * 60 * 60 * 24 );
+const weight_radius = 50 * day_radius;
 
 function weight_fn( d, date ) {
 
@@ -112,20 +115,38 @@ const drag = ( _ => {
     let start = null;
 
     function dragstarted( event, d ) {
-        d3.select(this).attr("stroke", "yellow");
+        
         start = { date: x.invert( d.x ), close: y.invert( d.y ), data: data.map( d => ({ ...d })) /*deep copy*/ };
         set_selected({ el: this, d });
     }
 
     function dragged(event, d) {
-        d3.select(this).raise().attr("cy", d.y = event.y); //do not set x        
+        d3.select(this).raise().attr( "cx", d.x = is_categorical ? event.x : d.x ).attr("cy", d.y = event.y); //do not set x        
+        
+        if( is_categorical ) {
 
-        const date = x.invert( d.x );
-        const close = y.invert( d.y );
-        const delta = { date: date - start.date, close: close - start.close };
-        const weights = start.data.map(( d, i ) => weight_fn( d, date ));
-        data = start.data.map(( d, i ) => ({ date: d.date, close: d.close + weights[ i ] * delta.close }));
+            const orderer_to_sorter = f => ( a, b ) => f( a ) - f( b );
+            const sorted = handles.sort( orderer_to_sorter( h => h.x ));
+            
+            sorted.forEach( h => {
+
+                const date = x.invert( h.x );
+                const close = y.invert( h.y );
+                data.forEach(( d, i ) => d.close = d.date >= date - day_radius ? close : d.close );    
+            });
+        }
+        else {
+
+            const date = x.invert( d.x );
+            const close = y.invert( d.y );
+            const delta = { date: date - start.date, close: close - start.close };
+            const weights = start.data.map(( d, i ) => weight_fn( d, date ));
+            data = start.data.map(( d, i ) => ({ date: d.date, close: d.close + weights[ i ] * delta.close }));    
+        }
+        
         data.forEach( d => d.close = Math.max( d.close, 0 ));
+        if( is_categorical ) data.forEach( d => d.close = Math.round( Math.min( n_categories, d.close )));
+
         update_data_hard( );
 
         handles.forEach( snap_to_line );
@@ -133,7 +154,7 @@ const drag = ( _ => {
     }
 
     function dragended( event, d ) {
-        d3.select(this).attr("stroke", null);
+        
         set_selected({ el: this, d });
     }
 
@@ -153,7 +174,16 @@ function update_handles( ) {
       .attr("cy", d => d.y)
       .attr("r", 7)
       .attr("fill", "steelblue" )
+      .attr("stroke", d => d.selected ? "orange" : "none" )
       .call(drag)
+}
+
+function select_newest_handle( ) {
+
+    svg.selectAll( "circle" ).each( function( d, i ) {
+
+        if( d.index == handles.length - 1 ) set_selected({ el: this, d });
+    });
 }
 
 function snap_to_line( d ) {
@@ -171,7 +201,7 @@ function update_data_hard( ) {
 
     // Scale the range of the data again 
     x.domain(d3.extent(data, function(d) { return d.date; }));
-    y.domain([0, Math.max( 1, d3.max(data, function(d) { return d.close; }))]);
+    y.domain([0, is_categorical ? n_categories : Math.max( 1, d3.max(data, function(d) { return d.close; }))]);
 
     // Make the changes
     line.selectAll("path")   // change the line
