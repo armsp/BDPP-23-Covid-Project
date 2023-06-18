@@ -38,6 +38,12 @@ const svg = div
         .attr("transform", 
               "translate(" + margin.left + "," + margin.top + ")");
 
+//Create a group element for the horizontal lines.
+var linesGroup = svg.append("g")
+  .attr("class", "lines-group");
+
+const orgline = svg.append( "g" ).append("path");
+
 let line = svg.append( "g" );
     // Select the SVG and append a 'g' element for each line segment
 
@@ -73,6 +79,7 @@ const colorScale = d3.scaleLinear()
 
 let handles = [ ];
 let data = [ ];
+let orgdata = [ ];
 
 let selected_handle = null;
 
@@ -205,6 +212,21 @@ function update_data_hard( ) {
     x.domain(d3.extent(data, function(d) { return d.date; }));
     y.domain([0, is_categorical ? n_categories : Math.max( 1, d3.max(data, function(d) { return d.close; }))]);
 
+    if( is_categorical ) {
+
+        linesGroup.selectAll("line")
+            .data( d3.range( 1, n_categories + 1 )) // Assuming yourData is an array of values associated with the categorical variable
+            .join("line")
+            .attr("class", "line")
+            .attr("x1", 0)
+            .attr("x2", width) // Adjust the width as needed
+            .attr("y1", function(d) { return y(d); }) // Adjust the yScale function according to your data
+            .attr("y2", function(d) { return y(d); }) // Adjust the yScale function according to your data
+            .style("stroke", "lightgrey");
+    }
+
+    orgline.attr("d", valueline(orgdata)).attr( "stroke", "lightblue" );
+
     // Make the changes
     line.selectAll("path")   // change the line
         .data(data.slice(0, -1))  // exclude the last point, because it has no next point
@@ -248,6 +270,8 @@ function set_country( country ) {
             d.date = parseDate(d.date);
             d.close = +d.close;
         });
+
+        orgdata = data.map( d => ({ date: d.date, close: d.close }));
 
         handles = [ ];
         set_selected( null );
