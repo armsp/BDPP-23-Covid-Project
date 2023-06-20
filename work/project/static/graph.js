@@ -17,14 +17,16 @@ const xAxis = d3.axisBottom( ).scale(x)
     .ticks(20);
 
 const yAxis = d3.axisLeft( ).scale(y)
-    .ticks(5);
+    .ticks( is_categorical ? n_categories : 4);
 
 // Define the line
 const valueline = d3.line()
     .x(function(d) { return x(d.date); })
     .y(function(d) { return y(d.close); });
 
-const div = ( is_measure ? d3.select( ".measures" ) : d3.select( ".outcomes" )).append( "div" );
+const row = ( is_measure ? d3.select( ".measures" ) : d3.select( ".outcomes" )).append( "tr" );
+const div = row.append( "td" ).append( "div" );
+const right_div = row.append( "td" ).append( "div" );
 
 div.append( "p" )
     .text( column.replaceAll( "_", " " ))
@@ -57,21 +59,22 @@ svg.append( "rect" )
     .attr("pointer-events", "all")
     .on("click", function(event) { // d3 v6 uses event as first argument
         const coordinates = d3.pointer(event, svg.node());
-        
+
         const d = { x: coordinates[ 0 ], y: coordinates[ 1 ], index: handles.length };
+
         snap_to_line( d );
         handles.push( d );
         update_handles( );
         select_newest_handle( );
     })
-    .on( "mouseenter", _ => {
+    .on( "mouseenter", on_mouse )
+    .on( "mouseover", on_mouse )
+    .on( "mousemove", on_mouse )
 
-        update_measurelines( );
-    })
-    .on( "mouseover", _ => {
-
-        update_measurelines( );
-    })
+function on_mouse(event) {
+    
+    update_measurelines( );
+}
 
 function update_measurelines( ) {
 
@@ -95,6 +98,11 @@ svg.append("g")
 svg.append("g")
     .attr("class", "y axis")
     .call(yAxis);
+
+const handle_circles = svg.append( "g" );
+
+const dotline = svg.append("g").append( "line" );
+const dot = svg.append("g").append( "circle" );
 
 // Create a color scale
 const colorScale = d3.scaleLinear()
@@ -187,6 +195,7 @@ const drag = ( _ => {
 
         handles.forEach( snap_to_line );
         update_handles( );
+        update_cursor( );
     }
 
     function dragended( event, d ) {
@@ -203,7 +212,7 @@ const drag = ( _ => {
 
 function update_handles( ) {
 
-    svg.selectAll("circle")
+    handle_circles.selectAll("circle")
     .data(handles)
     .join("circle")
       .attr("cx", d => d.x)
@@ -211,27 +220,79 @@ function update_handles( ) {
       .attr("r", 5)
       .attr("fill", is_measure ? d3.schemeCategory10[ 4 ] : d3.schemeCategory10[ 0 ] )
       .attr("stroke", d => d.selected ? d3.schemeCategory10[ 1 ] : "none" )
+      .attr( "cursor" , "move" )
       .call(drag)
 }
 
 function select_newest_handle( ) {
 
-    svg.selectAll( "circle" ).each( function( d, i ) {
+    handle_circles.selectAll( "circle" ).each( function( d, i ) {
 
         if( d.index == handles.length - 1 ) set_selected({ el: this, d });
     });
 }
 
-function snap_to_line( d ) {
+function get_snapped_to_line( cursor_x ) {
 
-    const date = x.invert( d.x );
+    if( data.length == 0 ) return 0;
+
+    const date = x.invert( cursor_x );
 
     // Find the data point that has the closest date to the target date
-    const closestDataPoint = data.reduce((a, b) => Math.abs(b.date - date) < Math.abs(a.date - date) ? b : a);
+    const closestDataPoint = data.reduce((a, b) => Math.abs(b.date - date) < Math.abs(a.date - date) ? b : a );
 
     // Get the y-value
-    d.y = y( closestDataPoint.close );
+    return y( closestDataPoint.close );
 }
+
+function snap_to_line( d ) {
+
+    d.y = get_snapped_to_line( d.x );
+}
+
+function update_cursor( ) {
+
+    const coordinates = d3.pointer(event, svg.node());
+    const d = { x: coordinates[ 0 ], y: coordinates[ 1 ], index: handles.length };
+    d3.select( "body" ).selectAll( `.cursor` )
+        .data([ 0 ])
+        .join( "span" )
+        .attr( "class", "cursor" )
+        .style( "display", "none" )
+        .attr( "data-x", d.x )
+        .attr( "data-y", d.y )
+
+    const [ cursor ] = d3.select( "body" ).selectAll( ".cursor" );
+
+    if( cursor ) {
+
+        const cursor_x = cursor.getAttribute( "data-x" );        
+        const close = y.invert( get_snapped_to_line( cursor_x ));
+
+        right_div.selectAll( "p" )
+            .data([ 0 ])
+            .join( "p" )
+            .html( `<b>${ is_categorical ? close.toFixed( 0 ) : close.toFixed( 2 )}</b>` );    
+
+        dotline
+            .attr( "x1", cursor_x )
+            .attr( "x2", cursor_x )
+            .attr( "y1", get_snapped_to_line( cursor_x ))
+            .attr( "y2", 0 )
+            .attr( "pointer-events", "none" )
+            .attr( "stroke", "#88888888" )
+            .attr( "stroke-dasharray", "5 5" )
+
+        dot
+            .attr( "cx", cursor_x )
+            .attr( "cy", get_snapped_to_line( cursor_x ))
+            .attr( "pointer-events", "none" )
+            .attr( "r", 3 )
+            .attr( "fill", "#88888888" )
+    }
+}
+
+document.body.addEventListener( "mousemove", update_cursor );
 
 function update_data_hard( ) {
 
@@ -281,6 +342,7 @@ function update_data_hard( ) {
         .attr( "y", 0 )
         .attr("width", width )
         .attr("height", height )
+        .attr( "cursor", "pointer" )
 
     svg.select(".x.axis") // change the x axis
         .call(xAxis);
@@ -334,3 +396,8 @@ set_country( "Germany" );
 return { set_country };
 
 }
+
+/*
+TODO: inter-plot cursor √
+- legend for categorical data
+*/
