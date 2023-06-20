@@ -3,7 +3,7 @@ function graph( column, { is_measure, is_categorical, n_categories } = { }) {
 // Set the dimensions of the canvas / graph
 const margin = {top: 10, right: 20, bottom: 30, left: 50},
     width = 700 - margin.left - margin.right,
-    height = 150 - margin.top - margin.bottom;
+    height = 100 - margin.top - margin.bottom;
 
 // Parse the date / time
 const parseDate = d3.timeParse("%Y-%m-%d");
@@ -24,7 +24,8 @@ const valueline = d3.line()
     .x(function(d) { return x(d.date); })
     .y(function(d) { return y(d.close); });
 
-const div = d3.select( "body" ).append( "div" );
+const div = ( is_measure ? d3.select( ".measures" ) : d3.select( ".outcomes" )).append( "div" );
+
 div.append( "p" )
     .text( column.replaceAll( "_", " " ))
     .style( "margin", 0 );
@@ -44,6 +45,9 @@ var linesGroup = svg.append("g")
 
 const orgline = svg.append( "g" ).append("path");
 
+//outcomes have an extra line for the measure that is focused right now
+const measureline = ! is_measure ? svg.append( "g" ).append("path").attr("class","measureline") : null;
+
 let line = svg.append( "g" );
     // Select the SVG and append a 'g' element for each line segment
 
@@ -59,7 +63,27 @@ svg.append( "rect" )
         handles.push( d );
         update_handles( );
         select_newest_handle( );
-    });
+    })
+    .on( "mouseenter", _ => {
+
+        update_measurelines( );
+    })
+    .on( "mouseover", _ => {
+
+        update_measurelines( );
+    })
+
+function update_measurelines( ) {
+
+    if( is_measure ) {
+
+        d3.selectAll( ".measureline" ).attr("d", valueline(data)).attr( "stroke", d3.schemeCategory10[ 4 ] + "88" );
+    }
+    else {
+
+        d3.selectAll( ".measureline" ).attr("d", "");
+    }
+}
 
 // Add the X Axis
 svg.append("g")
@@ -75,7 +99,7 @@ svg.append("g")
 // Create a color scale
 const colorScale = d3.scaleLinear()
     .domain([0, 1])  // replace with appropriate domain
-    .range(["steelblue", "orange"]);  // replace with your own colors
+    .range([ is_measure ? d3.schemeCategory10[ 4 ] : d3.schemeCategory10[ 0 ], d3.schemeCategory10[ 1 ]]);  // replace with your own colors
 
 let handles = [ ];
 let data = [ ];
@@ -117,6 +141,21 @@ function weight_fn( d, date ) {
     return Math.exp( - Math.pow(( d.date - date ) / weight_radius, 2 ));
 }
 
+function categorical_recompute_data( ) {
+
+    const orderer_to_sorter = f => ( a, b ) => f( a ) - f( b );
+    const sorted = handles.sort( orderer_to_sorter( h => h.x ));
+    
+    sorted.forEach( h => {
+
+        const date = x.invert( h.x );
+        const close = y.invert( h.y );
+        data.forEach(( d, i ) => d.close = d.date >= date - day_radius ? close : d.close );   
+        data.forEach( d => d.close = Math.max( d.close, 0 ));
+        data.forEach( d => d.close = Math.round( Math.min( n_categories, d.close ))); 
+    });
+}
+
 const drag = ( _ => {
 
     let start = null;
@@ -132,17 +171,7 @@ const drag = ( _ => {
         
         if( is_categorical ) {
 
-            //insert handles for every value change at start?
-
-            const orderer_to_sorter = f => ( a, b ) => f( a ) - f( b );
-            const sorted = handles.sort( orderer_to_sorter( h => h.x ));
-            
-            sorted.forEach( h => {
-
-                const date = x.invert( h.x );
-                const close = y.invert( h.y );
-                data.forEach(( d, i ) => d.close = d.date >= date - day_radius ? close : d.close );    
-            });
+            categorical_recompute_data( );
         }
         else {
 
@@ -151,10 +180,8 @@ const drag = ( _ => {
             const delta = { date: date - start.date, close: close - start.close };
             const weights = start.data.map(( d, i ) => weight_fn( d, date ));
             data = start.data.map(( d, i ) => ({ date: d.date, close: d.close + weights[ i ] * delta.close }));    
+            data.forEach( d => d.close = Math.max( d.close, 0 ));
         }
-        
-        data.forEach( d => d.close = Math.max( d.close, 0 ));
-        if( is_categorical ) data.forEach( d => d.close = Math.round( Math.min( n_categories, d.close )));
 
         update_data_hard( );
 
@@ -181,9 +208,9 @@ function update_handles( ) {
     .join("circle")
       .attr("cx", d => d.x)
       .attr("cy", d => d.y)
-      .attr("r", 7)
-      .attr("fill", "steelblue" )
-      .attr("stroke", d => d.selected ? "orange" : "none" )
+      .attr("r", 5)
+      .attr("fill", is_measure ? d3.schemeCategory10[ 4 ] : d3.schemeCategory10[ 0 ] )
+      .attr("stroke", d => d.selected ? d3.schemeCategory10[ 1 ] : "none" )
       .call(drag)
 }
 
@@ -208,6 +235,8 @@ function snap_to_line( d ) {
 
 function update_data_hard( ) {
 
+    if( is_categorical ) categorical_recompute_data( );
+
     // Scale the range of the data again 
     x.domain(d3.extent(data, function(d) { return d.date; }));
     y.domain([0, is_categorical ? n_categories : Math.max( 1, d3.max(data, function(d) { return d.close; }))]);
@@ -225,7 +254,7 @@ function update_data_hard( ) {
             .style("stroke", "lightgrey");
     }
 
-    orgline.attr("d", valueline(orgdata)).attr( "stroke", "lightblue" );
+    orgline.attr("d", valueline(orgdata)).attr( "stroke", is_measure ? d3.schemeCategory10[ 4 ] + "88" : d3.schemeCategory10[ 0 ] + "88" );
 
     // Make the changes
     line.selectAll("path")   // change the line
@@ -257,6 +286,8 @@ function update_data_hard( ) {
         .call(xAxis);
     svg.select(".y.axis") // change the y axis
         .call(yAxis);
+
+    update_measurelines( );
 }
 
 function set_country( country ) {

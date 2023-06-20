@@ -59,6 +59,7 @@ path {
         columns = c;
         update_columns( );
     });
+    
 
     function update_columns( ) {
 
@@ -91,6 +92,15 @@ path {
       // Do something with the selected option
       graphs.forEach( g => g.set_country( selectedOption ));
     }
+
+    const outcomes = d3.select( "body" ).append( "div" ).attr( "class", "outcomes" );
+    const measures = d3.select( "body" ).append( "div" ).attr( "class", "measures" );
+    
+    measures
+    .style( "overflow-y", "scroll" )
+    .style( "overflow-x", "hidden" )
+    .style( "height", "250px" );
+    
 </script>
 </body>
 </html>
