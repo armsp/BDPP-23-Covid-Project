@@ -221,7 +221,7 @@ function update_handles( ) {
       .attr("r", 5)
       .attr("fill", is_measure ? d3.schemeCategory10[ 4 ] : d3.schemeCategory10[ 0 ] )
       .attr("stroke", d => d.selected ? d3.schemeCategory10[ 1 ] : "none" )
-      .attr( "cursor" , "move" )
+      .attr( "cursor" , is_categorical ? "move": "ns-resize" )
       .call(drag)
 }
 
@@ -293,6 +293,11 @@ function update_cursor( is_active_column = false ) {
             .attr( "pointer-events", "none" )
             .attr( "r", 3 )
             .attr( "fill", "#88888888" )
+
+        d3.select( ".date" )
+            .style( "margin", "10px" )
+            .style( "margin-left", "350px" )
+            .html( `<b> ${ x.invert( cursor_x ).toISOString().slice(0,10) }</b> `);
     }
 }
 
