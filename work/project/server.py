@@ -41,6 +41,22 @@ def get_measure_columns( ):
        'c8ev_internationaltravel', 'h6m_facial_coverings',
        'c4m_restrictions_on_gatherings']
 
+@functools.cache
+def read_legend( column ):
+
+    with open( f'legend/{ column }', "r" ) as file: 
+        
+        text = file.read( )
+
+    data = {}
+    lines = text.strip().split('\n')
+    for line in lines:
+        if '-' in line:
+            key, value = line.split('-', 1)  # 1 is the maxsplit parameter.
+            data[key.strip()] = value.strip()
+    return data
+    
+
 @socketio.event
 def get_columns( ):
 
@@ -49,7 +65,9 @@ def get_columns( ):
         name = c, 
         is_measure = i >= 3,
         is_categorical = i >= 3 and not c.startswith( "new" ),
-        n_categories = [ 3, 4, 4, 4 ][ i - 5 ] if i >= 3 and not c.startswith( "new" ) else 0 ) for i, c in enumerate( df.columns )]
+        n_categories = [ 3, 4, 4, 4 ][ i - 5 ] if i >= 3 and not c.startswith( "new" ) else 0,
+        legend = read_legend( c ) if i >= 3 and not c.startswith( "new" ) else { }) for i, c in enumerate( df.columns )]
+        
 
 @socketio.event
 def get_countries( ):

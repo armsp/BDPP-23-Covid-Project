@@ -1,4 +1,4 @@
-function graph( column, { is_measure, is_categorical, n_categories } = { }) {
+function graph( column, { is_measure, is_categorical, n_categories, legend } = { }) {
 
 // Set the dimensions of the canvas / graph
 const margin = {top: 10, right: 20, bottom: 30, left: 50},
@@ -74,6 +74,7 @@ svg.append( "rect" )
 function on_mouse(event) {
     
     update_measurelines( );
+    update_cursor( true );
 }
 
 function update_measurelines( ) {
@@ -195,7 +196,7 @@ const drag = ( _ => {
 
         handles.forEach( snap_to_line );
         update_handles( );
-        update_cursor( );
+        update_cursor( true );
     }
 
     function dragended( event, d ) {
@@ -250,7 +251,7 @@ function snap_to_line( d ) {
     d.y = get_snapped_to_line( d.x );
 }
 
-function update_cursor( ) {
+function update_cursor( is_active_column = false ) {
 
     const coordinates = d3.pointer(event, svg.node());
     const d = { x: coordinates[ 0 ], y: coordinates[ 1 ], index: handles.length };
@@ -262,17 +263,20 @@ function update_cursor( ) {
         .attr( "data-x", d.x )
         .attr( "data-y", d.y )
 
+    if( is_active_column === true ) d3.select( "body" ).selectAll( `.cursor` ).attr( "data-active-column", column );
+
     const [ cursor ] = d3.select( "body" ).selectAll( ".cursor" );
 
     if( cursor ) {
 
         const cursor_x = cursor.getAttribute( "data-x" );        
         const close = y.invert( get_snapped_to_line( cursor_x ));
+        const is_categorical_and_active = is_categorical && cursor.getAttribute( "data-active-column" ) == column;
 
         right_div.selectAll( "p" )
             .data([ 0 ])
             .join( "p" )
-            .html( `<b>${ is_categorical ? close.toFixed( 0 ) : close.toFixed( 2 )}</b>` );    
+            .html( `<b>${ is_categorical ? close.toFixed( 0 ) : close.toFixed( 2 )}</b> `+ ( is_categorical_and_active ? "= " + legend[ "" + close.toFixed( 0 )] : "" ));    
 
         dotline
             .attr( "x1", cursor_x )
@@ -399,5 +403,6 @@ return { set_country };
 
 /*
 TODO: inter-plot cursor √
-- legend for categorical data
+- legend for categorical data √
+- date cursor √
 */

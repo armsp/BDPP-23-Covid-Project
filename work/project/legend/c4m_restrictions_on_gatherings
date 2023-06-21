@@ -1,0 +1,6 @@
+0 - no restrictions 
+1 - restrictions on very large gatherings (the limit is above 1000 people) 
+2 - restrictions on gatherings between 101-1000 people 
+3 - restrictions on gatherings between 11-100 people 
+4 - restrictions on gatherings of 10 people or less 
+Blank - no data
