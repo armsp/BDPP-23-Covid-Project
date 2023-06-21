@@ -28,6 +28,22 @@ path {
     shape-rendering: crispEdges;
 }
 
+.fade-in {
+
+    position: sticky;
+    top: 0;
+    height: 1px; /* adjust as needed */
+    background: linear-gradient(to top, rgba(255,255,255,0), rgba(255,255,255,1));
+    transform: scaleY( 20 ) translateY( -5% );
+    /*transform: translateY( 100% );*/
+}
+
+.fade-out {
+    height: 20px; /* adjust as needed */
+    background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,1));
+    transform: translateY( -100% );
+}
+
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script>
 
@@ -99,14 +115,25 @@ path {
 
 
     const outcomes = d3.select( ".tables" ).append( "table" ).attr( "class", "outcomes" );
+    
+    
+
     const measures = d3.select( ".tables" ).append( "table" ).attr( "class", "measures" );
+
+    measures.append( "div" ).attr( "class" , "fade-in" );    
+    
     
     measures
         .style( "display", "block" )
+        .style( "position", "relative" )
         .style( "overflow-y", "auto" )
         .style( "height", "250px" )
         .style( "width", "900px" )
-        .style( "resize", "vertical" );
+        .style( "resize", "vertical" )
+        .style( "background", "rgba(240, 248, 255, 0.53)" )
+        .style( "padding-top", "10px" )
+
+    d3.select( ".tables" ).append( "div" ).attr( "class" , "fade-out" ); 
 
     d3.select( "body" ).append( "div" ).attr( "class" , "date" );
 
