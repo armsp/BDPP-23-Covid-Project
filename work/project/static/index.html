@@ -44,13 +44,28 @@ path {
     transform: translateY( -1000% ) scaleY( 20 );
 }
 
+.logline::before {
+
+    content: "log: ";
+}
+
+.logline {
+
+    font-family: monospace;
+}
+
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script>
 
 <script type="text/javascript" charset="utf-8">
     socket = io();
 
-    socket.on( "log", console.log );
+    socket.on( "log", ( ...args ) => {
+
+        console.log( ...args )
+        logline.html( args.join( ", " ));
+    });
+
 </script>
 
 <!-- load the d3.js library -->    
@@ -146,6 +161,8 @@ path {
       .append("select")
       .attr("class", "select")      // add any classes you need
       .on("change", onchange);      // specify the function to run when an option is selected
+
+    const logline = d3.select( "body" ).append( "span" ).attr( "class", "logline" );
 
     d3.select( "body" ).append( "div" ).attr( "class" , "tables" );
 
