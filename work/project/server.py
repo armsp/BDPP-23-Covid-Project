@@ -137,6 +137,7 @@ def main( ):
 
     # preheat
     train_model( "belief_ensemble" )
+    load_data( "Germany" )
     
     try:
 
