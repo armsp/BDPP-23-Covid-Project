@@ -1,4 +1,4 @@
-function graph( column, { is_measure, is_categorical, n_categories, legend } = { }) {
+function graph( column, { is_measure, is_categorical, n_categories, legend, data_changed_callback } = { }) {
 
 // Set the dimensions of the canvas / graph
 const margin = {top: 10, right: 20, bottom: 30, left: 50},
@@ -7,6 +7,8 @@ const margin = {top: 10, right: 20, bottom: 30, left: 50},
 
 // Parse the date / time
 const parseDate = d3.timeParse("%Y-%m-%d");
+//reverse
+const formatDate = d3.timeFormat("%Y-%m-%d");
 
 // Set the ranges
 const x = d3.scaleTime().range([0, width]);
@@ -113,6 +115,7 @@ const colorScale = d3.scaleLinear()
 let handles = [ ];
 let data = [ ];
 let orgdata = [ ];
+let last_data = null;
 
 let selected_handle = null;
 
@@ -150,6 +153,20 @@ function weight_fn( d, date ) {
     return Math.exp( - Math.pow(( d.date - date ) / weight_radius, 2 ));
 }
 
+function data_is_equal( d1, d2 ) {
+
+    return Math.max( ...d1.map(( _, i ) => Math.abs( d1[ i ].close - d2[ i ].close ))) < 1e-9;
+}
+
+function check_data_changed( ) {
+
+    const unchanged = last_data === null || data_is_equal( data, last_data );
+    if( ! unchanged ) data_changed_callback( column );
+
+    last_data = data.map( d => ({ ...d })); //deep copy
+    if( ! data_is_equal( data, last_data )) console.error( "data should be equal" );
+}
+
 function categorical_recompute_data( ) {
 
     const orderer_to_sorter = f => ( a, b ) => f( a ) - f( b );
@@ -163,7 +180,11 @@ function categorical_recompute_data( ) {
         data.forEach( d => d.close = Math.max( d.close, 0 ));
         data.forEach( d => d.close = Math.round( Math.min( n_categories, d.close ))); 
     });
+
+    check_data_changed( );
 }
+
+let is_dragging = false;
 
 const drag = ( _ => {
 
@@ -173,9 +194,11 @@ const drag = ( _ => {
         
         start = { date: x.invert( d.x ), close: y.invert( d.y ), data: data.map( d => ({ ...d })) /*deep copy*/ };
         set_selected({ el: this, d });
+        is_dragging = true;
     }
 
     function dragged(event, d) {
+        is_dragging = true;
         d3.select(this).raise().attr( "cx", d.x = is_categorical ? event.x : d.x ).attr("cy", d.y = event.y); //do not set x        
         
         if( is_categorical ) {
@@ -190,6 +213,7 @@ const drag = ( _ => {
             const weights = start.data.map(( d, i ) => weight_fn( d, date ));
             data = start.data.map(( d, i ) => ({ date: d.date, close: d.close + weights[ i ] * delta.close }));    
             data.forEach( d => d.close = Math.max( d.close, 0 ));
+            check_data_changed( );
         }
 
         update_data_hard( );
@@ -202,6 +226,7 @@ const drag = ( _ => {
     function dragended( event, d ) {
         
         set_selected({ el: this, d });
+        is_dragging = false;
     }
 
     return d3.drag()
@@ -365,19 +390,16 @@ function set_country( country ) {
 
     socket.emit( "get_data", country, callback = df => {
 
-        data = d3.csvParse( df[ column ]);
-
-        data.forEach(function(d) {
-
-            d.date = parseDate(d.date);
-            d.close = +d.close;
-        });
+        set_data_from_csv( df, false );
 
         orgdata = data.map( d => ({ date: d.date, close: d.close }));
+        last_data = null;
 
         handles = [ ];
         set_selected( null );
         update_handles( );
+        
+        last_data = null;
         update_data_hard( );
 
         if( is_categorical ) {
@@ -397,12 +419,47 @@ function set_country( country ) {
         }
 
         update_handles( );
+        last_data = null;
     });
 }
 
 set_country( "Germany" );
 
-return { set_country };
+function data_to_csv( data ) {
+
+    const mapped = data.map(d => ({
+        date: formatDate(d.date),
+        close: d.close.toString() // Convert the numbers back to strings
+    }));
+
+    const csv = d3.csvFormat(mapped);
+
+    return csv;
+}
+
+function set_data_from_csv( df, trigger_update = true ) {
+
+    data = d3.csvParse( df[ column ]);
+
+    data.forEach(function(d) {
+
+        d.date = parseDate(d.date);
+        d.close = +d.close;
+    });
+
+    if( trigger_update ) update_data_hard( );
+}
+
+return { 
+
+    set_country, 
+    data_csv: _ => data_to_csv( data ), 
+    orgdata_csv: _ => data_to_csv( orgdata ), 
+    get_column: _ => column, 
+    set_data_from_csv, 
+    is_measure: _ => is_measure 
+
+};
 
 }
 
@@ -410,4 +467,9 @@ return { set_country };
 TODO: inter-plot cursor √
 - legend for categorical data √
 - date cursor √
+- cache trained models on disk using the node system √
+- transmit logs before end of event handler (python) √
+- length check of time series (cropping to valid range may have changed length)
+- determine effective predicted range
+- introduce alternative model (window regression)
 */

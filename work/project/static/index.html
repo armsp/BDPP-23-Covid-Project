@@ -49,6 +49,8 @@ path {
 
 <script type="text/javascript" charset="utf-8">
     socket = io();
+
+    socket.on( "log", console.log );
 </script>
 
 <!-- load the d3.js library -->    
@@ -61,11 +63,11 @@ path {
     const graphs = [ ];    
 
     // Your data
-    let contries = [ ];
+    let countries = [ ];
 
     socket.emit( "get_countries", callback = c => {
 
-        contries = c;
+        countries = c;
         update_countries( );
     });
 
@@ -77,13 +79,66 @@ path {
         update_columns( );
     });
     
+    let country = null;
 
     function update_columns( ) {
 
         columns.forEach( col => {
 
-            graphs.push( graph( col.name, { ...col }));
+            graphs.push( graph( col.name, { ...col, data_changed_callback }));
         });
+    }
+
+    let version = 0;
+    let timeout = null;
+    let locked = false;
+
+    function do_prediction( ) {
+
+        if( locked ) {
+
+            console.error( "triggered prediction multiple times" );
+            return;
+        }
+
+        locked = true;
+
+        timeout = null;
+        console.log( "do_prediction" );
+
+        /*
+        TODO: here we take the original data for outcomes. in theory, they should be modifiable too and the ternary
+        would not be required. for now, this is more stable for subsequent predictions
+        */
+
+        const all_data = Object.fromEntries( graphs.map( g => [ 
+            
+            g.get_column( ), 
+            g.is_measure( ) ? g.data_csv( ) : g.orgdata_csv( )
+        ]));
+
+        const version_old = version;
+
+        socket.emit( "predict", all_data, country, callback = predicted => { 
+
+            graphs.forEach( graph => {
+
+                if( ! graph.is_measure( )) graph.set_data_from_csv( predicted );
+            });
+
+
+            //if the data was changed in the meantime, we must predict again right away
+            if( version != version_old ) setTimeout( do_prediction, 0 );
+            locked = false;
+        });    
+    }
+
+    function data_changed_callback( from_column ) {
+
+        console.log( "data changed", from_column );
+        version += 1;
+        if( timeout ) clearTimeout( timeout )
+        timeout = setTimeout( do_prediction, 500 );
     }
 
     // Select the container where you want to add the dropdown
@@ -98,7 +153,7 @@ path {
 
         // Add options to the dropdown
         select.selectAll("option")
-          .data(contries)                // bind your data
+          .data(countries)                // bind your data
           .join( "option" )
           .text(function (d) { return d; });  // set the text of each option to the data value
     }
@@ -107,9 +162,9 @@ path {
 
     // Function to run when an option is selected
     function onchange() {
-      var selectedOption = d3.select("body").select("select").property("value");
+      country = d3.select("body").select("select").property("value");
       // Do something with the selected option
-      graphs.forEach( g => g.set_country( selectedOption ));
+      graphs.forEach( g => g.set_country( country ));
     }
 
 

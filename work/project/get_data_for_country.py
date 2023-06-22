@@ -11,6 +11,8 @@ from types import SimpleNamespace as ns
 import math
 import require
 get_oxford_categorical_flagged = require.single( "get_oxford_categorical_flagged" )
+categorical_to_dummy = require.single( "categorical_to_dummy" )
+indicators = require.single( "indicators" )
 
 def get_data_for_country( country, categorical_as_dummy = True, verbose = True ):
 
@@ -76,45 +78,16 @@ def get_data_for_country( country, categorical_as_dummy = True, verbose = True )
 
     # Oxford measures
 
-    indicators = [ 
-    
-        ns( name = "c6m_stay_at_home_requirements", range = np.arange( 4. )), 
-        ns( name = "c8ev_internationaltravel", range = np.arange( 5. )), 
-        ns( name = "h6m_facial_coverings", range = np.arange( 5. )), 
-        ns( name = "c4m_restrictions_on_gatherings", range = np.arange( 5. )) 
-    ]
-    
-    dummy_series_per_indicator = { 
-        indicator.name: get_oxford_categorical_flagged( 
-            country, indicator.name, 
-            verbose = False, 
-            use_dummies = categorical_as_dummy 
-        ) for indicator in indicators }
+    series_per_indicator = { indicator.name: get_oxford_categorical_flagged( country, indicator.name, verbose = False ) for indicator in indicators }
 
     for indicator in indicators:
 
-        dummy_series = dummy_series_per_indicator[ indicator.name ]
         date_offset = 2 # oxford data starts 2 days earlier, just discard it
+        measure_df[ indicator.name ] = series_per_indicator[ indicator.name ][ date_offset: ]
 
-        if categorical_as_dummy:
-        
-            for value in [ v for v in indicator.range if v != 0 ]:
-        
-                key = f"{ value }"
-                column = f"{ indicator.name }=={ value }"
-                
-                if key in dummy_series:
-        
-                    measure_df[ column ] = dummy_series[ key ][ date_offset: ]
-                    assert measure_df.index[ 0 ] == dummy_series[ key ].index[ date_offset ]
-        
-                else:
-        
-                    measure_df[ column ] = 0
+    if categorical_as_dummy:
 
-        else:
-
-            measure_df[ indicator.name ] = dummy_series[ date_offset: ]
+        measure_df = categorical_to_dummy( measure_df )
 
     if verbose:
 
