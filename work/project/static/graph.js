@@ -105,7 +105,10 @@ svg.append("g")
 const handle_circles = svg.append( "g" );
 
 const dotline = svg.append("g").append( "line" );
+const predline = svg.append("g").append( "line" );
 const dot = svg.append("g").append( "circle" );
+
+let predline_x = null;
 
 // Create a color scale
 const colorScale = d3.scaleLinear()
@@ -246,7 +249,7 @@ function update_handles( ) {
       .attr("r", 5)
       .attr("fill", is_measure ? d3.schemeCategory10[ 4 ] : d3.schemeCategory10[ 0 ] )
       .attr("stroke", d => d.selected ? d3.schemeCategory10[ 1 ] : "none" )
-      .attr( "cursor" , is_categorical ? "move": "ns-resize" )
+      .attr( "cursor", is_categorical ? "move": "ns-resize" )
       .call(drag)
 }
 
@@ -274,6 +277,22 @@ function get_snapped_to_line( cursor_x ) {
 function snap_to_line( d ) {
 
     d.y = get_snapped_to_line( d.x );
+}
+
+function update_predline( ) {
+
+    if( predline_x == null ) return;
+
+    //looks ugly
+    /*
+    predline
+            .attr( "x1", predline_x )
+            .attr( "x2", predline_x )
+            .attr( "y1", height )
+            .attr( "y2", 0 )
+            .attr( "pointer-events", "none" )
+            .attr( "stroke", d3.schemeCategory10[ 1 ] )
+    */
 }
 
 function update_cursor( is_active_column = false ) {
@@ -365,7 +384,7 @@ function update_data_hard( ) {
             
             // Use the color scale to get a color for this distance
             const weight = selected_handle ? weight_fn( d, x.invert( selected_handle.d.x )) : 0;
-            return colorScale( weight );
+            return predline_x && x( d.date ) >= predline_x ? d3.schemeCategory10[ 1 ] : colorScale( weight );
         });
 
     //update bounding box
@@ -457,8 +476,8 @@ return {
     orgdata_csv: _ => data_to_csv( orgdata ), 
     get_column: _ => column, 
     set_data_from_csv, 
-    is_measure: _ => is_measure 
-
+    is_measure: _ => is_measure,
+    set_pred_start_index: index => { predline_x = index === null ? null : x( data[ index ].date ); update_predline( ); update_data_hard( )}
 };
 
 }

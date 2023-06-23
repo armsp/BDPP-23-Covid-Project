@@ -136,11 +136,15 @@ path {
         console.log( country );
 
         const args = [ all_data, country ];
-        socket.emit( "predict", args, callback = predicted => { 
+        socket.emit( "predict", args, callback = ([ predicted, pred_start_index ]) => { 
 
             graphs.forEach( graph => {
 
-                if( ! graph.is_measure( )) graph.set_data_from_csv( predicted );
+                if( ! graph.is_measure( )) {
+
+                    graph.set_data_from_csv( predicted );
+                    graph.set_pred_start_index( pred_start_index ?? null )
+                }
             });
 
 

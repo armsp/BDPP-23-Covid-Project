@@ -66,7 +66,7 @@ def get_countries( ):
 @functools.cache
 def get_data( country ):
 
-    df = load_data( country )
+    df = load_data( country ).copy( )
     fill_df( df )
     return df_to_csvs( df )
 
@@ -104,10 +104,10 @@ def find_first_different_index( df1, df2 ):
     diff = ( df1 - df2 ).abs( ).to_numpy( )
     cumsum = diff.sum( axis = 1 ).cumsum( )
     cumsum_diff = np.pad(np.diff( cumsum ), (0, 1), 'constant') 
-    changed_to_much = ( cumsum > 100 ) & ( cumsum_diff >= 1 ) 
+    changed_too_much = ( cumsum > 100 ) & ( cumsum_diff >= 1 ) 
     
     # Find the first index where they differ too much
-    first_diff_index = changed_to_much.argmax( ) if changed_to_much.any( ) else None
+    first_diff_index = changed_too_much.argmax( ) if changed_too_much.any( ) else None
 
     plt.clf( )
     plt.plot( cumsum )
@@ -157,17 +157,18 @@ def predict( args ):
     if start is None:
 
         log( "nothing to be done" )
-        return df_to_csvs( df )
+        return [ df_to_csvs( df ), None ]
 
     else:
 
         df_pred = model.predict_replace( df, start = start )
+        df_pred.iloc[ :start ] = df.iloc[ :start ]
         assert df_pred.shape == df.shape
         assert df_pred.columns.tolist( ) == reference.columns.tolist( )
         assert df_pred.isna( ).any( ).any( )
         
         log( "done" )
-        return df_to_csvs( df_pred )
+        return [ df_to_csvs( df_pred ), str( start )]
 
 def log( * args ):
 
