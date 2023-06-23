@@ -7,17 +7,18 @@ import pandas as pd
 from IPython.display import display, HTML
 import require
 get_valid_range = require.single( "get_valid_range" )
+verbose = require.untracked.single( "verbose" )
 
-def crop_to_valid_range( df, verbose = 1 ):
+def crop_to_valid_range( df ):
 
-    df = df.iloc[ get_valid_range( df, verbose = verbose ), : ]
+    df = df.iloc[ get_valid_range( df ), : ]
     
     # Check if DataFrame has any NaN values
     for col, sum in df.isna( ).sum( ).items( ):
 
         if sum > 0:
 
-            if verbose >= 1:
+            if verbose( ) >= 1:
                 
                 display( HTML( f"<p>warning '{ col }' has { sum } nan(s). performed forward fill.</p>" ))
 

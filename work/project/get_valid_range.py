@@ -4,14 +4,12 @@ source: crop_to_valid_range_h.ipynb
 """
 
 
+import require
 import numpy as np
 from IPython.display import display, HTML
+verbose = require.untracked.single( "verbose" )
 
-def get_valid_range( df, verbose = 1 ):
-
-    if verbose == False:
-
-        verbose = 0
+def get_valid_range( df ):
     
     # find valid time range for this dataframe
     n, d = df.shape
@@ -26,7 +24,7 @@ def get_valid_range( df, verbose = 1 ):
     index_or_minus_inf = np.ma.masked_array( index_per_series, mask = np.isnan( df.to_numpy( ))).filled( - inf )
     last_per_column = index_or_minus_inf.max( axis = 0 )
 
-    if verbose >= 2:
+    if verbose( ) >= 2:
 
         display( HTML( f"<h3>valid intervals (exclusive)</h3>" ))
 
@@ -39,7 +37,7 @@ def get_valid_range( df, verbose = 1 ):
 
     assert start != inf and end != -inf, "your data is completely unusable, see verbose = 2 for more info"
 
-    if verbose >= 1:
+    if verbose( ) >= 1:
 
         display( HTML( f"<p>all-valid interval (exclusive) <b>{ start }:{ end }</b></p>" ))
         display( HTML( f"<p>you retain <b>{ 100 * ( end - start ) / n :.1f}%</b> of your data</p>" ))

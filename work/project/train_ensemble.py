@@ -18,4 +18,5 @@ def train_ensemble( ):
         return e
 
     return main
-    
+
+node = train_ensemble

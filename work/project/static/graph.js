@@ -495,4 +495,5 @@ TODO: inter-plot cursor √
 - length check of time series (cropping to valid range may have changed length) √
 - determine effective predicted range √
 - introduce alternative model (window regression)
+    - ditch hospitalization rate: not enough countries covered
 */
