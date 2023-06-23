@@ -83,7 +83,7 @@ function update_measurelines( ) {
 
     if( is_measure ) {
 
-        d3.selectAll( ".measureline" ).attr("d", valueline(data)).attr( "stroke", d3.schemeCategory10[ 4 ] + "88" );
+        d3.selectAll( ".measureline" ).transition( ).duration( 100 ).attr("d", valueline(data)).attr( "stroke", d3.schemeCategory10[ 4 ] + "88" );
     }
     else {
 
@@ -311,11 +311,15 @@ function update_cursor( is_active_column = false ) {
 
     const [ cursor ] = d3.select( "body" ).selectAll( ".cursor" );
 
+    title.text( column.replaceAll( "_", " " ));
+
     if( cursor ) {
 
         const cursor_x = cursor.getAttribute( "data-x" );        
         const close = y.invert( get_snapped_to_line( cursor_x ));
         const is_categorical_and_active = is_categorical && cursor.getAttribute( "data-active-column" ) == column;
+
+        title.text( column.replaceAll( "_", " " ) + ( predline_x && cursor_x >= predline_x ? " (predicted)" : "" ));
 
         right_div.selectAll( "p" )
             .data([ 0 ])
@@ -348,16 +352,6 @@ function update_cursor( is_active_column = false ) {
 document.body.addEventListener( "mousemove", update_cursor );
 
 function update_data_hard( ) {
-
-    title.text( column.replaceAll( "_", " " ));
-
-    const [ cursor ] = d3.select( "body" ).selectAll( ".cursor" );
-
-    if( cursor ) {
-        
-        const cursor_x = cursor.getAttribute( "data-x" );        
-        title.text( column.replaceAll( "_", " " ) + ( predline_x && cursor_x >= predline_x ? "(predicted)" : "" ));
-    }
 
     if( is_categorical ) categorical_recompute_data( );
 
