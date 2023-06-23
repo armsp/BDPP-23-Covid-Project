@@ -30,9 +30,9 @@ const row = ( is_measure ? d3.select( ".measures" ) : d3.select( ".outcomes" )).
 const div = row.append( "td" ).append( "div" );
 const right_div = row.append( "td" ).append( "div" );
 
-div.append( "p" )
-    .text( column.replaceAll( "_", " " ))
-    .style( "margin", 0 );
+const title = div.append( "p" );
+title.style( "margin", 0 );
+    
 
 // Adds the svg canvas
 const svg = div
@@ -348,6 +348,16 @@ function update_cursor( is_active_column = false ) {
 document.body.addEventListener( "mousemove", update_cursor );
 
 function update_data_hard( ) {
+
+    title.text( column.replaceAll( "_", " " ));
+
+    const [ cursor ] = d3.select( "body" ).selectAll( ".cursor" );
+
+    if( cursor ) {
+        
+        const cursor_x = cursor.getAttribute( "data-x" );        
+        title.text( column.replaceAll( "_", " " ) + ( predline_x && cursor_x >= predline_x ? "(predicted)" : "" ));
+    }
 
     if( is_categorical ) categorical_recompute_data( );
 

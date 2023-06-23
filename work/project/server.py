@@ -104,7 +104,7 @@ def find_first_different_index( df1, df2 ):
     diff = ( df1 - df2 ).abs( ).to_numpy( )
     cumsum = diff.sum( axis = 1 ).cumsum( )
     cumsum_diff = np.pad(np.diff( cumsum ), (0, 1), 'constant') 
-    changed_too_much = ( cumsum > 100 ) & ( cumsum_diff >= 1 ) 
+    changed_too_much = ( cumsum > 100 )
     
     # Find the first index where they differ too much
     first_diff_index = changed_too_much.argmax( ) if changed_too_much.any( ) else None
