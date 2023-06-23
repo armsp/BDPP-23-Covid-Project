@@ -3,3 +3,5 @@
 *.pkl
 log.jsonl
 node_cache/version.txt
+cumsum.png
+cumsum_diff.png

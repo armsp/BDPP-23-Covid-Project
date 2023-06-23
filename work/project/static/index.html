@@ -133,8 +133,10 @@ path {
         ]));
 
         const version_old = version;
+        console.log( country );
 
-        socket.emit( "predict", all_data, country, callback = predicted => { 
+        const args = [ all_data, country ];
+        socket.emit( "predict", args, callback = predicted => { 
 
             graphs.forEach( graph => {
 
@@ -160,7 +162,7 @@ path {
     let select = d3.select("body")  // change "body" to your container's ID or class
       .append("select")
       .attr("class", "select")      // add any classes you need
-      .on("change", onchange);      // specify the function to run when an option is selected
+      .on("change", update_select);
 
     const logline = d3.select( "body" ).append( "span" ).attr( "class", "logline" );
 
@@ -173,23 +175,21 @@ path {
           .data(countries)                // bind your data
           .join( "option" )
           .text(function (d) { return d; });  // set the text of each option to the data value
+
+        update_select( );
     }
 
     update_countries( );
 
     // Function to run when an option is selected
-    function onchange() {
-      country = d3.select("body").select("select").property("value");
-      // Do something with the selected option
-      graphs.forEach( g => g.set_country( country ));
+    function update_select( ) {
+
+        country = d3.select("body").select("select").property("value");
+        // Do something with the selected option
+        graphs.forEach( g => g.set_country( country ));
     }
 
-
-
     const outcomes = d3.select( ".tables" ).append( "table" ).attr( "class", "outcomes" );
-    
-    
-
     const measures = d3.select( ".tables" ).append( "table" ).attr( "class", "measures" );
 
     measures.append( "div" ).attr( "class" , "fade-in" );    

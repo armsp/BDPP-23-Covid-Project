@@ -50,7 +50,7 @@ class ensemble:
     
         self.__dict__.update( ensemble = ensemble )
 
-    def predict_replace( self, df ):
+    def predict_replace( self, df, start = None, length = None ):
 
         ensemble = self.ensemble
         # for predicted time range
@@ -58,10 +58,9 @@ class ensemble:
         min_start = max([ l.length_l + l.lag for l in ensemble ])
         min_length = max([ l.length_r for l in ensemble ])
         
-        start = min_start
-        length = df.shape[ 0 ] - start
-        
-        assert start >= min_start
+        start = min_start if start is None else start
+        start = max( start, min_start )
+        length = df.shape[ 0 ] - start if length is None else length
         assert length >= min_length
         assert start + length <= df.shape[ 0 ]
         

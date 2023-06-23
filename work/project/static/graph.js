@@ -470,6 +470,7 @@ TODO: inter-plot cursor √
 - cache trained models on disk using the node system √
 - transmit logs before end of event handler (python) √
 - length check of time series (cropping to valid range may have changed length) √
-- determine effective predicted range
+- determine effective predicted range √
+- change influence region display of categorical data
 - introduce alternative model (window regression)
 */

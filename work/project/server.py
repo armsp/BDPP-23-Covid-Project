@@ -8,8 +8,10 @@ from flask_socketio import SocketIO
 from io import StringIO
 import os
 import pandas as pd
+import numpy as np
 import require
 import functools
+import matplotlib.pyplot as plt
 data_for_country = require.single( "data_for_country" )
 categorical_to_dummy = require.single( "categorical_to_dummy" )
 crop_to_valid_range = require.single( "crop_to_valid_range" )
@@ -64,7 +66,9 @@ def get_countries( ):
 @functools.cache
 def get_data( country ):
 
-    return df_to_csvs( load_data( country ))
+    df = load_data( country )
+    fill_df( df )
+    return df_to_csvs( df )
 
 def df_to_csvs( df ):
 
@@ -94,23 +98,76 @@ def train_model( method ):
         train_ensemble_node = require.single( "train_ensemble" )
         return train_ensemble_node.get_result( )
 
-@socketio.event
-def predict( csvs, country, method = "belief_ensemble" ):
+def find_first_different_index( df1, df2 ):
 
-    model = train_model( method )
-    df = categorical_to_dummy( csvs_to_df( csvs ))
+    # create a dataframe of True/False values
+    diff = ( df1 - df2 ).abs( ).to_numpy( )
+    cumsum = diff.sum( axis = 1 ).cumsum( )
+    cumsum_diff = np.pad(np.diff( cumsum ), (0, 1), 'constant') 
+    changed_to_much = ( cumsum > 100 ) & ( cumsum_diff >= 1 ) 
+    
+    # Find the first index where they differ too much
+    first_diff_index = changed_to_much.argmax( ) if changed_to_much.any( ) else None
+
+    plt.clf( )
+    plt.plot( cumsum )
+    
+    if first_diff_index:
+        
+        plt.axvline( x = first_diff_index, color = "r" )
+        
+    plt.savefig( "cumsum.png" )
+
+    plt.clf( )
+    plt.plot( cumsum_diff )
+
+    if first_diff_index:
+        
+        plt.axvline( x = first_diff_index, color = "r" )
+        
+    plt.savefig( "cumsum_diff.png" )
+    
+    log( f"first_diff_index { first_diff_index }" )
+    return first_diff_index
+
+def fill_df( df ):
+
     df.fillna( axis = 0, method = "ffill", inplace = True )
     df.fillna( axis = 0, method = "bfill", inplace = True )
-    reference = categorical_to_dummy( load_data( 'Germany' ))
-    assert df.columns.tolist( ) == reference.columns.tolist( )
     assert not df.isna( ).any( ).any( )
+
+@socketio.event
+def predict( args ):
+
+    csvs, country = args
+    method = "belief_ensemble"
+    
+    df = categorical_to_dummy( csvs_to_df( csvs ))
+    assert not df.isna( ).any( ).any( )
+        
+    reference = categorical_to_dummy( csvs_to_df( get_data( country )))
+    assert not reference.isna( ).any( ).any( )
+    assert df.columns.tolist( ) == reference.columns.tolist( )
+    
     log( "making predictions..." )
-    df_pred = model.predict_replace( df )
-    assert df_pred.shape == df.shape
-    assert df_pred.columns.tolist( ) == reference.columns.tolist( )
-    assert df_pred.isna( ).any( ).any( )
-    log( "done" )
-    return df_to_csvs( df_pred )
+    model = train_model( method )
+    start = find_first_different_index( df, reference )
+
+    # no prediction necessary
+    if start is None:
+
+        log( "nothing to be done" )
+        return df_to_csvs( df )
+
+    else:
+
+        df_pred = model.predict_replace( df, start = start )
+        assert df_pred.shape == df.shape
+        assert df_pred.columns.tolist( ) == reference.columns.tolist( )
+        assert df_pred.isna( ).any( ).any( )
+        
+        log( "done" )
+        return df_to_csvs( df_pred )
 
 def log( * args ):
 
