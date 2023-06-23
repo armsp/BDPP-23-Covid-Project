@@ -469,7 +469,7 @@ TODO: inter-plot cursor √
 - date cursor √
 - cache trained models on disk using the node system √
 - transmit logs before end of event handler (python) √
-- length check of time series (cropping to valid range may have changed length)
+- length check of time series (cropping to valid range may have changed length) √
 - determine effective predicted range
 - introduce alternative model (window regression)
 */

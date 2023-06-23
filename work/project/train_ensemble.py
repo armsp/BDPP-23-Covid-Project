@@ -14,7 +14,7 @@ def train_ensemble( ):
     def main( training_data: training_data_node.given( )):
 
         e = ensemble( )
-        e.train( training_data.result, verbose = 1 )
+        e.train( training_data.result )
         return e
 
     return main

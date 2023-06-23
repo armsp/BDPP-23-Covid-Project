@@ -10,7 +10,7 @@ import os
 import pandas as pd
 import require
 import functools
-get_data_for_country = require.single( "get_data_for_country" )
+data_for_country = require.single( "data_for_country" )
 categorical_to_dummy = require.single( "categorical_to_dummy" )
 crop_to_valid_range = require.single( "crop_to_valid_range" )
 
@@ -21,29 +21,11 @@ socketio = SocketIO(app)
 def load_data( country ):
 
     log( f"loading data for { country }" )
-    return get_data_for_country( country, verbose = False, categorical_as_dummy = False )
+    return data_for_country.get_result( country, categorical_as_dummy = False )
 
 @app.route('/')
 def serve_index():
     return send_from_directory('static', 'index.html')
-
-@socketio.event
-def my_event(json):
-    log('received json: ' + str(json))
-    return "OK", 200
-
-@socketio.event
-def get_outcome_columns( ):
-    
-    return ['new_cases_smoothed_per_million', 'new_deaths_smoothed_per_million', 'weekly_hosp_admissions_per_million', ]
-
-@socketio.event
-def get_measure_columns( ):
-    
-    return ['new_vaccinations_smoothed_per_million',
-       'new_tests_smoothed_per_thousand', 'c6m_stay_at_home_requirements',
-       'c8ev_internationaltravel', 'h6m_facial_coverings',
-       'c4m_restrictions_on_gatherings']
 
 @functools.cache
 def read_legend( column ):
@@ -79,6 +61,7 @@ def get_countries( ):
     return [ "Germany", "Switzerland", "Italy", "France", "Belgium", "United States", "Spain", "United Kingdom", "Malaysia", "South Korea", "Chile" ]
 
 @socketio.event
+@functools.cache
 def get_data( country ):
 
     return df_to_csvs( load_data( country ))
@@ -111,19 +94,21 @@ def train_model( method ):
         train_ensemble_node = require.single( "train_ensemble" )
         return train_ensemble_node.get_result( )
 
-def check_df( df ):
-
-    reference = categorical_to_dummy( load_data( 'Germany' ))
-    assert df.columns.tolist( ) == reference.columns.tolist( )
-
 @socketio.event
 def predict( csvs, country, method = "belief_ensemble" ):
 
     model = train_model( method )
-    df = crop_to_valid_range( categorical_to_dummy( csvs_to_df( csvs )), verbose = False )
-    check_df( df )
+    df = categorical_to_dummy( csvs_to_df( csvs ))
+    df.fillna( axis = 0, method = "ffill", inplace = True )
+    df.fillna( axis = 0, method = "bfill", inplace = True )
+    reference = categorical_to_dummy( load_data( 'Germany' ))
+    assert df.columns.tolist( ) == reference.columns.tolist( )
+    assert not df.isna( ).any( ).any( )
     log( "making predictions..." )
     df_pred = model.predict_replace( df )
+    assert df_pred.shape == df.shape
+    assert df_pred.columns.tolist( ) == reference.columns.tolist( )
+    assert df_pred.isna( ).any( ).any( )
     log( "done" )
     return df_to_csvs( df_pred )
 

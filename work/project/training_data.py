@@ -8,11 +8,11 @@ import require
 @nodes.generic_node
 def training_data( ):
 
-    get_training_data = require.single( "get_training_data" )
+    compute_training_data = require.single( "compute_training_data" )
     
     def main( ):
 
-        return get_training_data( verbose = 0 )
+        return compute_training_data( )
 
     return main
     
