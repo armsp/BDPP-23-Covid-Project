@@ -495,5 +495,9 @@ TODO: inter-plot cursor √
 - length check of time series (cropping to valid range may have changed length) √
 - determine effective predicted range √
 - introduce alternative model (window regression)
-    - ditch hospitalization rate: not enough countries covered
+    - ditch hospitalization rate: not enough countries covered (find a way to switch back and forth)
+- introduce model evaluation during training using cross validation
+- introduce confidence
+- write: why linear model is not robust against low-evidence data
+- normalize threshold for automatic prediction range
 */

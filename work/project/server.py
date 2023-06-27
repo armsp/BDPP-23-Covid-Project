@@ -12,7 +12,8 @@ import numpy as np
 import require
 import functools
 import matplotlib.pyplot as plt
-data_for_country = require.single( "data_for_country" )
+import nodes
+
 categorical_to_dummy = require.single( "categorical_to_dummy" )
 crop_to_valid_range = require.single( "crop_to_valid_range" )
 
@@ -23,7 +24,7 @@ socketio = SocketIO(app)
 def load_data( country ):
 
     log( f"loading data for { country }" )
-    return data_for_country.get_result( country, categorical_as_dummy = False )
+    return nodes.find( "data_for_country" ).get_result( country, categorical_as_dummy = False )
 
 @app.route('/')
 def serve_index():
@@ -98,6 +99,10 @@ def train_model( method ):
         train_ensemble_node = require.single( "train_ensemble" )
         return train_ensemble_node.get_result( )
 
+    if method == "honest_forward":
+
+        return nodes.find( "train_honest_forward" ).get_result( )
+
 def find_first_different_index( df1, df2 ):
 
     # create a dataframe of True/False values
@@ -140,7 +145,7 @@ def fill_df( df ):
 def predict( args ):
 
     csvs, country = args
-    method = "belief_ensemble"
+    method = "honest_forward"
     
     df = categorical_to_dummy( csvs_to_df( csvs ))
     assert not df.isna( ).any( ).any( )
@@ -165,7 +170,7 @@ def predict( args ):
         df_pred.iloc[ :start ] = df.iloc[ :start ]
         assert df_pred.shape == df.shape
         assert df_pred.columns.tolist( ) == reference.columns.tolist( )
-        assert df_pred.isna( ).any( ).any( )
+        assert not df_pred.isna( ).any( ).any( )
         
         log( "done" )
         return [ df_to_csvs( df_pred ), str( start )]
@@ -179,7 +184,7 @@ def log( * args ):
 def main( ):
 
     # preheat
-    train_model( "belief_ensemble" )
+    train_model( "honest_forward" )
     load_data( "Germany" )
     
     try:

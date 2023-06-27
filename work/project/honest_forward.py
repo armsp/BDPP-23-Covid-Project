@@ -13,7 +13,15 @@ class honest_forward:
     def train( self, train_set ):
 
         length_r = 1
-        learner = train_weak_learner( train_set, length_l = 100, lag = 50, length_r = length_r, linear_operator = np.identity( 1 ))    
+        learner = train_weak_learner( 
+        
+            train_set, 
+            length_l = 100, 
+            lag = 50, 
+            length_r = length_r, 
+            linear_operator = np.identity( 1 ),
+            type = "forest"
+        )    
     
         self.__dict__.update( learner = learner )
 

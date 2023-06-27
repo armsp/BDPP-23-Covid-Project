@@ -19,11 +19,12 @@ def train_weak_learner( * args, ** kwargs ):
 
 class weak_learner:
 
-    def train( self, dataframes, length_l = 1, lag = 0, length_r = 1, linear_operator = None, weight = 1 ):
+    def train( self, dataframes, length_l = 1, lag = 0, length_r = 1, linear_operator = None, weight = 1, type = "lm" ):
 
         if linear_operator is None:
 
-            linear_operator = np.ones(( 1, length_r )) / length_r
+            #average
+            linear_operator = np.ones(( 1, length_r )) / length_r        
     
         # number of outcomes
         n_outcomes = 3
@@ -110,21 +111,18 @@ class weak_learner:
             display( md( " ".join( s )))
     
         def get_weak_learner( X, Y ):
-    
-            from sklearn.linear_model import LinearRegression as lm
-            return lm( ).fit( X, Y )
+
+            if type == "lm":
+            
+                from sklearn.linear_model import LinearRegression as lm
+                return lm( n_jobs = -1  ).fit( X, Y )
+
+            if type == "forest":
+
+                from sklearn.ensemble import RandomForestRegressor as rf
+                return rf( n_jobs = -1 ).fit( X, Y )
     
         model = get_weak_learner( X, Y )
-    
-        def predict( window ):
-    
-            assert window.shape == ( length_l, d )
-            x = window.reshape( 1, -1, order = "C" )
-            assert x.shape == ( 1, length_l * d )
-            y = model.predict( x ).squeeze( 0 )
-            assert y.shape == ( linear_operator.shape[ 0 ] * n_outcomes, )
-            y = y.reshape( linear_operator.shape[ 0 ], n_outcomes )
-            return y
     
         # avoid excessive memory usage
         del dataframes, L, R, X, Z, M, Y
