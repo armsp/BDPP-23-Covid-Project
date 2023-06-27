@@ -75,143 +75,184 @@ path {
 
 <script type="text/javascript">
 
-    const graphs = [ ];    
+const graphs = [ ];    
 
-    // Your data
-    let countries = [ ];
+// Your data
+let countries = [ ];
+let country = null;
 
-    socket.emit( "get_countries", callback = c => {
+socket.emit( "get_countries", callback = c => {
 
-        countries = c;
-        update_countries( );
-    });
-
-    let columns = [ ];
-
-    socket.emit( "get_columns", callback = c => {
-
-        columns = c;
-        update_columns( );
-    });
-    
-    let country = null;
-
-    function update_columns( ) {
-
-        columns.forEach( col => {
-
-            graphs.push( graph( col.name, { ...col, data_changed_callback }));
-        });
-    }
-
-    let version = 0;
-    let timeout = null;
-    let locked = false;
-
-    function do_prediction( ) {
-
-        if( locked ) {
-
-            console.error( "triggered prediction multiple times" );
-            return;
-        }
-
-        locked = true;
-
-        timeout = null;
-        console.log( "do_prediction" );
-
-        /*
-        TODO: here we take the original data for outcomes. in theory, they should be modifiable too and the ternary
-        would not be required. for now, this is more stable for subsequent predictions
-        */
-
-        const all_data = Object.fromEntries( graphs.map( g => [ 
-            
-            g.get_column( ), 
-            g.is_measure( ) ? g.data_csv( ) : g.orgdata_csv( )
-        ]));
-
-        const version_old = version;
-        console.log( country );
-
-        const args = [ all_data, country ];
-        socket.emit( "predict", args, callback = ([ predicted, pred_start_index ]) => { 
-
-            graphs.forEach( graph => {
-
-                if( ! graph.is_measure( )) {
-
-                    graph.set_data_from_csv( predicted );
-                    graph.set_pred_start_index( pred_start_index ?? null )
-                }
-            });
-
-
-            //if the data was changed in the meantime, we must predict again right away
-            if( version != version_old ) setTimeout( do_prediction, 0 );
-            locked = false;
-        });    
-    }
-
-    function data_changed_callback( from_column ) {
-
-        console.log( "data changed", from_column );
-        version += 1;
-        if( timeout ) clearTimeout( timeout )
-        timeout = setTimeout( do_prediction, 500 );
-    }
-
-    // Select the container where you want to add the dropdown
-    let select = d3.select("body")  // change "body" to your container's ID or class
-      .append("select")
-      .attr("class", "select")      // add any classes you need
-      .on("change", update_select);
-
-    const logline = d3.select( "body" ).append( "span" ).attr( "class", "logline" );
-
-    d3.select( "body" ).append( "div" ).attr( "class" , "tables" );
-
-    function update_countries( ) {
-
-        // Add options to the dropdown
-        select.selectAll("option")
-          .data(countries)                // bind your data
-          .join( "option" )
-          .text(function (d) { return d; });  // set the text of each option to the data value
-
-        update_select( );
-    }
-
+    countries = c;
     update_countries( );
+});
 
-    // Function to run when an option is selected
-    function update_select( ) {
+let methods = [ ];
+let method = null;
 
-        country = d3.select("body").select("select").property("value");
-        // Do something with the selected option
-        graphs.forEach( g => g.set_country( country ));
+socket.emit( "get_methods", callback = m => {
+
+    methods = m;
+    update_methods( );
+});
+
+let columns = [ ];
+
+socket.emit( "get_columns", callback = c => {
+
+    columns = c;
+    update_columns( );
+});
+
+function update_columns( ) {
+
+    columns.forEach( col => {
+
+        graphs.push( graph( col.name, { ...col, data_changed_callback }));
+    });
+}
+
+let version = 0;
+let timeout = null;
+let locked = false;
+
+function do_prediction( ) {
+
+    if( locked ) {
+
+        console.error( "triggered prediction multiple times" );
+        return;
     }
 
-    const outcomes = d3.select( ".tables" ).append( "table" ).attr( "class", "outcomes" );
-    const measures = d3.select( ".tables" ).append( "table" ).attr( "class", "measures" );
+    locked = true;
 
-    measures.append( "div" ).attr( "class" , "fade-in" );    
-    
-    
-    measures
-        .style( "display", "block" )
-        .style( "position", "relative" )
-        .style( "overflow-y", "auto" )
-        .style( "height", "250px" )
-        .style( "width", "900px" )
-        .style( "resize", "vertical" )
-        .style( "background", "rgba(240, 248, 255, 0.53)" )
-        .style( "padding-top", "10px" )
+    timeout = null;
+    console.log( "do_prediction" );
 
-    d3.select( ".tables" ).append( "div" ).attr( "class" , "fade-out" ); 
+    /*
+    TODO: here we take the original data for outcomes. in theory, they should be modifiable too and the ternary
+    would not be required. for now, this is more stable for subsequent predictions
+    */
 
-    d3.select( "body" ).append( "div" ).attr( "class" , "date" );
+    const all_data = Object.fromEntries( graphs.map( g => [ 
+        
+        g.get_column( ), 
+        g.is_measure( ) ? g.data_csv( ) : g.orgdata_csv( )
+    ]));
+
+    const version_old = version;
+    console.log( country );
+
+    const args = [ all_data, country, method ];
+    console.log( method );
+    socket.emit( "predict", args, callback = ([ predicted, pred_start_index ]) => { 
+
+        graphs.forEach( graph => {
+
+            if( ! graph.is_measure( )) {
+
+                graph.set_data_from_csv( predicted );
+                graph.set_pred_start_index( pred_start_index ?? null )
+            }
+        });
+
+
+        //if the data was changed in the meantime, we must predict again right away
+        if( version != version_old ) setTimeout( do_prediction, 0 );
+        locked = false;
+    });    
+}
+
+function data_changed_callback( from_column ) {
+
+    console.log( "data changed", from_column );
+    version += 1;
+    if( timeout ) clearTimeout( timeout )
+    timeout = setTimeout( do_prediction, 500 );
+}
+
+
+// Select the container where you want to add the dropdown
+let country_select = d3.select("body")  // change "body" to your container's ID or class
+  .append("select")
+  .attr("class", "select")      // add any classes you need
+  .on("change", update_country_select );
+
+function update_countries( ) {
+
+    // Add options to the dropdown
+    country_select.selectAll("option")
+      .data(countries)                // bind your data
+      .join( "option" )
+      .text(function (d) { return d; });  // set the text of each option to the data value
+
+    update_country_select( );
+}
+
+update_countries( );
+
+// Function to run when an option is selected
+function update_country_select( ) {
+
+    country = country_select.property("value");
+    // Do something with the selected option
+    graphs.forEach( g => g.set_country( country ));
+}
+
+
+
+const method_select = d3.select("body")  // change "body" to your container's ID or class
+  .append("select")
+  .attr("class", "select")      // add any classes you need
+  .on("change", update_method_select);
+
+
+function update_methods( ) {
+
+    // Add options to the dropdown
+    method_select.selectAll("option")
+      .data(methods)                // bind your data
+      .join( "option" )
+      .text(function (d) { return d; });  // set the text of each option to the data value
+
+    update_method_select( );
+}
+
+update_methods( );
+
+function update_method_select( ) {
+
+    method = method_select.property("value");
+    data_changed_callback( );
+}
+
+
+
+
+const logline = d3.select( "body" ).append( "span" ).attr( "class", "logline" );
+
+d3.select( "body" ).append( "div" ).attr( "class" , "tables" );
+
+
+const outcomes = d3.select( ".tables" ).append( "table" ).attr( "class", "outcomes" );
+const measures = d3.select( ".tables" ).append( "table" ).attr( "class", "measures" );
+
+measures.append( "div" ).attr( "class" , "fade-in" );    
+
+
+measures
+    .style( "display", "block" )
+    .style( "position", "relative" )
+    .style( "overflow-y", "auto" )
+    .style( "height", "250px" )
+    .style( "width", "900px" )
+    .style( "resize", "vertical" )
+    .style( "background", "rgba(240, 248, 255, 0.53)" )
+    .style( "padding-top", "10px" )
+
+d3.select( ".tables" ).append( "div" ).attr( "class" , "fade-out" ); 
+
+d3.select( "body" ).append( "div" ).attr( "class" , "date" );
 
 </script>
 </body>

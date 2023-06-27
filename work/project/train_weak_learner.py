@@ -10,6 +10,8 @@ from IPython.display import display, HTML, Markdown as md
 import require
 display_dict = require.single( "display_dict" )
 verbose = require.untracked.single( "verbose" )
+# number of outcomes
+n_outcomes = len( require.single( "owid_outcomes" ))
 
 def train_weak_learner( * args, ** kwargs ):
 
@@ -25,9 +27,6 @@ class weak_learner:
 
             #average
             linear_operator = np.ones(( 1, length_r )) / length_r        
-    
-        # number of outcomes
-        n_outcomes = 3
         
         #number of time series
         d = dataframes[ 0 ].shape[ 1 ]
@@ -64,9 +63,6 @@ class weak_learner:
         assert linear_operator.shape[ 1 ] == length_r, f"linear_operator of shape { linear_operator.shape } cannot be applied to a window of shape { length_r, n_outcomes }"
     
         def get_patch( df, i, length_l, lag, length_r ):
-    
-            # number of outcomes
-            n_outcomes = 3 
             
             left = df.iloc[ i : i + length_l, : ]
             right = df.iloc[ i + length_l + lag : i + length_l + lag + length_r, :n_outcomes ] # assume outcomes are the first columns

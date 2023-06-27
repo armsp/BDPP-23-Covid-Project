@@ -15,6 +15,8 @@ get_oxford_categorical_flagged = require.single( "get_oxford_categorical_flagged
 categorical_to_dummy = require.single( "categorical_to_dummy" )
 indicators = require.single( "indicators" )
 verbose = require.untracked.single( "verbose" )
+owid_outcomes = require.single( "owid_outcomes" )
+owid_measures = require.single( "owid_measures" )
 
 def compute_data_for_country( country, categorical_as_dummy = True ):
 
@@ -56,7 +58,7 @@ def compute_data_for_country( country, categorical_as_dummy = True ):
 
     # outcomes
 
-    columns = [ "new_cases_smoothed_per_million", "new_deaths_smoothed_per_million", "weekly_hosp_admissions_per_million" ]
+    columns = owid_outcomes
     outcome_df = df[ columns ].copy( )
 
     for c in columns:
@@ -71,7 +73,7 @@ def compute_data_for_country( country, categorical_as_dummy = True ):
 
     # OWID measures
 
-    columns = [ "new_vaccinations_smoothed_per_million", "new_tests_smoothed_per_thousand" ]
+    columns = owid_measures
     measure_df = df[ columns ].copy( )
 
     for c in columns:

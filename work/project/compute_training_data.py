@@ -17,6 +17,7 @@ but we use the dataframe for window processing and need NaN-free series
 compute_data_for_country = require.single( "compute_data_for_country" )
 crop_to_valid_range = require.single( "crop_to_valid_range" )
 verbose = require.untracked.single( "verbose" )
+countries = require.single( "countries_with_hospitalization_data" )
 
 def compute_training_data( ):
 
@@ -26,21 +27,6 @@ def compute_training_data( ):
     
     dataframes = [ ]
 
-    countries = [ 
-        
-        "Germany", 
-        "Switzerland", 
-        "Italy", 
-        "France", 
-        "Belgium", 
-        "United States", 
-        "Spain", 
-        "United Kingdom", 
-        "Malaysia", 
-        "South Korea", 
-        "Chile" 
-    ]
-    
     for country in tqdm( countries, file = sys.stdout, desc = "collecting data" ):
 
         if verbose( ):

@@ -1,0 +1,1 @@
+owid_measures = [ "new_vaccinations_smoothed_per_million", "new_tests_smoothed_per_thousand" ]

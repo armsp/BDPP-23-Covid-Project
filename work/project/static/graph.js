@@ -415,6 +415,8 @@ function set_country( country ) {
 
         set_data_from_csv( df, false );
 
+        predline_x = null;
+
         orgdata = data.map( d => ({ date: d.date, close: d.close }));
         last_data = null;
 
@@ -424,6 +426,8 @@ function set_country( country ) {
         
         last_data = null;
         update_data_hard( );
+
+
 
         if( is_categorical ) {
 
@@ -494,10 +498,11 @@ TODO: inter-plot cursor √
 - transmit logs before end of event handler (python) √
 - length check of time series (cropping to valid range may have changed length) √
 - determine effective predicted range √
-- introduce alternative model (window regression)
-    - ditch hospitalization rate: not enough countries covered (find a way to switch back and forth)
+- introduce alternative model (window regression) √
+    - ditch hospitalization rate: not enough countries covered (find a way to switch back and forth) √
 - introduce model evaluation during training using cross validation
 - introduce confidence
 - write: why linear model is not robust against low-evidence data
 - normalize threshold for automatic prediction range
+- display prediction progress
 */

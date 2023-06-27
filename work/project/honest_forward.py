@@ -7,6 +7,7 @@ source: train_honest_forward.ipynb
 import require
 import numpy as np
 train_weak_learner = require.single( "train_weak_learner" )
+n_outcomes = len( require.single( "owid_outcomes" ))
 
 class honest_forward:
 
@@ -44,13 +45,13 @@ class honest_forward:
         lag = learner.lag
 
         df_pred = df.copy( )
-        df_pred.iloc[ start:, :3 ] = np.nan
+        df_pred.iloc[ start:, :n_outcomes ] = np.nan
     
         for i in range( n_predictions ):
     
             window = df_pred.iloc[ start - lag - learner.length_l + i: start - lag + i, : ].to_numpy( )
             y = learner.predict( window )
-            assert y.shape == ( learner.length_r, 3 )
-            df_pred.iloc[ start + i: start + i + learner.length_r, :3 ] = y
+            assert y.shape == ( learner.length_r, n_outcomes )
+            df_pred.iloc[ start + i: start + i + learner.length_r, :n_outcomes ] = y
     
         return df_pred

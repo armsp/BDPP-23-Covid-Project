@@ -13,3 +13,5 @@ def set_level( level ):
 	with open( "verbose.txt", "w" ) as file:
 
 		file.write( f"{ level }" )
+
+set_level( 0 )

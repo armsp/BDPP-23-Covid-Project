@@ -11,6 +11,7 @@ import sys
 import require
 train_weak_learner = require.single( "train_weak_learner" )
 verbose = require.untracked.single( "verbose" )
+n_outcomes = len( require.single( "owid_outcomes" ))
 
 class ensemble:
 
@@ -107,7 +108,7 @@ class ensemble:
         prediction, *_ = np.linalg.lstsq( lhs, rhs, rcond = None )
     
         df_pred = df.copy( )
-        df_pred.iloc[ :, : ] = np.nan
-        df_pred.iloc[ start : start + length, :3 ] = prediction
+        df_pred.iloc[ :, :n_outcomes ] = np.nan
+        df_pred.iloc[ start : start + length, :n_outcomes  ] = prediction
     
         return df_pred

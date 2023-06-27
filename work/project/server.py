@@ -48,20 +48,32 @@ def read_legend( column ):
 
 @socketio.event
 def get_columns( ):
+    
+    outcomes = require.single( "owid_outcomes" )
+    n_outcomes = len( outcomes )
+    owid_measures = require.single( "owid_measures" )
+    n_numerical = n_outcomes + len( owid_measures )
+    indicators = require.single( "indicators" )
 
-    df = load_data( "Germany" )
+    columns = [ * outcomes, * owid_measures, * [ i.name for i in indicators ]]
+    assert columns == load_data( "Germany" ).columns.tolist( )
+    
     return [ dict( 
-        name = c, 
-        is_measure = i >= 3,
-        is_categorical = i >= 3 and not c.startswith( "new" ),
-        n_categories = [ 3, 4, 4, 4 ][ i - 5 ] if i >= 3 and not c.startswith( "new" ) else 0,
-        legend = read_legend( c ) if i >= 3 and not c.startswith( "new" ) else { }) for i, c in enumerate( df.columns )]
-        
+        name = name, 
+        is_measure = i >= n_outcomes,
+        is_categorical = i >= n_numerical,
+        n_categories = len( indicators[ i - n_numerical ].range ) if i >= n_numerical else 0,
+        legend = read_legend( name ) if i >= n_numerical else { }) for i, name in enumerate( columns )]
 
 @socketio.event
 def get_countries( ):
     
-    return [ "Germany", "Switzerland", "Italy", "France", "Belgium", "United States", "Spain", "United Kingdom", "Malaysia", "South Korea", "Chile" ]
+    return require.single( "countries_with_hospitalization_data" )
+
+@socketio.event
+def get_methods( ):
+    
+    return [ "belief_ensemble", "honest_forward" ]
 
 @socketio.event
 @functools.cache
@@ -90,6 +102,8 @@ def csvs_to_df( csvs ):
         df.index = parsed.index
 
     return df
+
+
 
 @functools.cache
 def train_model( method ):
@@ -144,8 +158,7 @@ def fill_df( df ):
 @socketio.event
 def predict( args ):
 
-    csvs, country = args
-    method = "honest_forward"
+    csvs, country, method = args
     
     df = categorical_to_dummy( csvs_to_df( csvs ))
     assert not df.isna( ).any( ).any( )
@@ -154,7 +167,7 @@ def predict( args ):
     assert not reference.isna( ).any( ).any( )
     assert df.columns.tolist( ) == reference.columns.tolist( )
     
-    log( "making predictions..." )
+    log( f"{ method } making predictions..." )
     model = train_model( method )
     start = find_first_different_index( df, reference )
 
@@ -184,7 +197,10 @@ def log( * args ):
 def main( ):
 
     # preheat
-    train_model( "honest_forward" )
+    for m in get_methods( ):
+        
+        train_model( m )
+    
     load_data( "Germany" )
     
     try:
