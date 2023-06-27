@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from types import SimpleNamespace as ns
 import math
+import functools
 import require
 get_oxford_categorical_flagged = require.single( "get_oxford_categorical_flagged" )
 categorical_to_dummy = require.single( "categorical_to_dummy" )
@@ -52,8 +53,8 @@ def compute_data_for_country( country, categorical_as_dummy = True ):
     if verbose( ):
 
         display( HTML( f"<h1>{ country }</h1>" ))
-    
-    df = pd.read_csv( "data/owid-covid-data.csv", index_col = "date", parse_dates = True, low_memory = False )
+
+    df = read_owid_csv( ).copy( )
     df = df[ df.location == country ]
 
     # outcomes
@@ -101,3 +102,8 @@ def compute_data_for_country( country, categorical_as_dummy = True ):
 
     full_df = pd.concat([ outcome_df, measure_df ], axis = 1 )
     return full_df
+
+@functools.cache
+def read_owid_csv( ):
+
+    return pd.read_csv( "data/owid-covid-data.csv", index_col = "date", parse_dates = True, low_memory = False )

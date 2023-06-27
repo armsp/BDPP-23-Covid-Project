@@ -17,18 +17,23 @@ but we use the dataframe for window processing and need NaN-free series
 compute_data_for_country = require.single( "compute_data_for_country" )
 crop_to_valid_range = require.single( "crop_to_valid_range" )
 verbose = require.untracked.single( "verbose" )
-countries = require.single( "countries_with_hospitalization_data" )
+owid_countries = require.single( "countries_in_owid" )
+oxford_countries = require.single( "countries_in_oxford" )
+broken_countries = require.single( "countries_known_to_be_broken" )
 
 def compute_training_data( ):
 
+    countries = list( set( owid_countries ).intersection( oxford_countries ).difference( broken_countries ))
+    
     if verbose( ):
 
         display( HTML( f"<h1>Training data</h1>" ))
+        print( countries )
     
     dataframes = [ ]
 
     for country in tqdm( countries, file = sys.stdout, desc = "collecting data" ):
-
+        
         if verbose( ):
         
             display( HTML( f"<h3>{ country }</h3>" ))
