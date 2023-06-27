@@ -504,7 +504,7 @@ TODO: inter-plot cursor √
 - introduce model evaluation during training using cross validation
 - introduce confidence
 - write: why linear model is not robust against low-evidence data
-- normalize threshold for automatic prediction range
+- normalize threshold for automatic prediction range √
 - display prediction progress √
 - write: how to use the app
 */

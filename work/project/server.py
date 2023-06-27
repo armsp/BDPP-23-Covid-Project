@@ -12,6 +12,7 @@ import numpy as np
 import require
 import functools
 import matplotlib.pyplot as plt
+from sklearn.preprocessing import MinMaxScaler
 import nodes
 
 categorical_to_dummy = require.single( "categorical_to_dummy" )
@@ -121,11 +122,16 @@ def train_model( method ):
 
 def find_first_different_index( df1, df2 ):
 
+    scaler = MinMaxScaler( )
+    scaler.fit( df1 )
+    df1 = pd.DataFrame( scaler.transform( df1 ), columns = df1.columns )
+    df2 = pd.DataFrame( scaler.transform( df2 ), columns = df2.columns )
+    
     # create a dataframe of True/False values
     diff = ( df1 - df2 ).abs( ).to_numpy( )
     cumsum = diff.sum( axis = 1 ).cumsum( )
     cumsum_diff = np.pad(np.diff( cumsum ), (0, 1), 'constant') 
-    changed_too_much = ( cumsum > 100 )
+    changed_too_much = ( cumsum > 10 )
     
     # Find the first index where they differ too much
     first_diff_index = changed_too_much.argmax( ) if changed_too_much.any( ) else None
@@ -197,7 +203,6 @@ def predict( args ):
     else:
 
         df_pred = model.predict_replace( df, start = start, callback = prediction_callback )
-        df_pred.iloc[ :start ] = df.iloc[ :start ]
         assert df_pred.shape == df.shape
         assert df_pred.columns.tolist( ) == reference.columns.tolist( )
         assert not df_pred.isna( ).any( ).any( )

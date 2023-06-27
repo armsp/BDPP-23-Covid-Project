@@ -115,7 +115,6 @@ class ensemble:
         prediction, *_ = np.linalg.lstsq( lhs, rhs, rcond = None )
     
         df_pred = df.copy( )
-        df_pred.iloc[ :, :n_outcomes ] = np.nan
-        df_pred.iloc[ start : start + length, :n_outcomes  ] = prediction
+        df_pred.iloc[ start : start + length, :n_outcomes ] = prediction
     
         return df_pred
