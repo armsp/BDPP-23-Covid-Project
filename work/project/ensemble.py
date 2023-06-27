@@ -51,8 +51,9 @@ class ensemble:
     
         self.__dict__.update( ensemble = ensemble )
 
-    def predict_replace( self, df, start = None, length = None ):
+    def predict_replace( self, df, start = None, length = None, callback = None ):
 
+        callback = ( lambda * _: None ) if callback is None else callback
         ensemble = self.ensemble
         # for predicted time range
         
@@ -68,6 +69,9 @@ class ensemble:
         lhs_chunks = [ ]
         rhs_chunks = [ ]
         weight_chunks = [ ]
+
+        n_predictions_total = sum([ 1 + length - learner.length_r for learner in ensemble ])
+        n_predictions_done = 0
         
         for learner in tqdm( ensemble, file = sys.stdout, desc = "training ensemble" ):
         
@@ -89,6 +93,9 @@ class ensemble:
                 # each weak learner is now regarded equally important, independent of total rows occupied
                 # otherwise learners with smaller windows and larger operators are favoured
                 weight_chunks.append( np.ones( M.shape[ 0 ], ) * ( learner.weight / n_rows_total ))
+
+                n_predictions_done += 1
+                callback( n_predictions_done / n_predictions_total )
     
         lhs = np.concatenate( lhs_chunks, axis = 0 )
         rhs = np.concatenate( rhs_chunks, axis = 0 )

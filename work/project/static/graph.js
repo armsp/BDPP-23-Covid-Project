@@ -500,9 +500,11 @@ TODO: inter-plot cursor √
 - determine effective predicted range √
 - introduce alternative model (window regression) √
     - ditch hospitalization rate: not enough countries covered (find a way to switch back and forth) √
+    - train on many more countries and regions
 - introduce model evaluation during training using cross validation
 - introduce confidence
 - write: why linear model is not robust against low-evidence data
 - normalize threshold for automatic prediction range
-- display prediction progress
+- display prediction progress √
+- write: how to use the app
 */

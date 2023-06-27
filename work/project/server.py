@@ -108,6 +108,8 @@ def csvs_to_df( csvs ):
 @functools.cache
 def train_model( method ):
 
+    log( f"training { method }" )
+    
     if method == "belief_ensemble":
 
         train_ensemble_node = require.single( "train_ensemble" )
@@ -145,8 +147,11 @@ def find_first_different_index( df1, df2 ):
         plt.axvline( x = first_diff_index, color = "r" )
         
     plt.savefig( "cumsum_diff.png" )
-    
-    log( f"first_diff_index { first_diff_index }" )
+
+    if first_diff_index:
+        
+        log( f"change detected at index { first_diff_index }" )
+        
     return first_diff_index
 
 def fill_df( df ):
@@ -154,6 +159,18 @@ def fill_df( df ):
     df.fillna( axis = 0, method = "ffill", inplace = True )
     df.fillna( axis = 0, method = "bfill", inplace = True )
     assert not df.isna( ).any( ).any( )
+
+last_sent_message = None
+
+def prediction_callback( progress ):
+
+    global last_sent_message
+    message = f"prediction progress { int( progress * 100 )}%"
+
+    if last_sent_message != message:
+
+        log( message )
+        last_sent_message = message
 
 @socketio.event
 def predict( args ):
@@ -179,7 +196,7 @@ def predict( args ):
 
     else:
 
-        df_pred = model.predict_replace( df, start = start )
+        df_pred = model.predict_replace( df, start = start, callback = prediction_callback )
         df_pred.iloc[ :start ] = df.iloc[ :start ]
         assert df_pred.shape == df.shape
         assert df_pred.columns.tolist( ) == reference.columns.tolist( )
@@ -216,3 +233,4 @@ def main( ):
 if "is_server" in os.environ:
 
     main( )
+    
