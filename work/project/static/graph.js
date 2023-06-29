@@ -501,6 +501,7 @@ TODO: inter-plot cursor √
 - introduce alternative model (window regression) √
     - ditch hospitalization rate: not enough countries covered (find a way to switch back and forth) √
     - train on many more countries and regions
+    - add forward prediction to ensemble
 - introduce model evaluation during training using cross validation
 - introduce confidence
 - write: why linear model is not robust against low-evidence data
@@ -509,4 +510,6 @@ TODO: inter-plot cursor √
 - write: how to use the app
 - write: why ditch hospitalization data
 - write: documentation for each file, especially the require, nodes, etc. lot
+- add self-managed .gitignore for nodes (if cached nodes are small enough)
+- add node visualization tool
 */
