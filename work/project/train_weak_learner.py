@@ -101,12 +101,12 @@ def train_weak_learner(
             n_jobs = args.n_jobs
             kwargs = args.__dict__
             print( kwargs )
-            model = rf( warm_start = True, ** kwargs )
+            model = rf( warm_start = True, oob_score = True, ** kwargs )
             
             n_steps = int( math.ceil( n_estimators / n_jobs ))
             for i in tqdm( range( n_steps ), file = sys.stdout, desc = "training estimators" ):
 
-                model.set_params( n_estimators = n_jobs * ( i + 1 ))
+                model.set_params( n_estimators = n_jobs * ( i + 1 ), oob_score = i == n_steps - 1 )
                 model.fit( X, Y )    
 
         print( "done" )
@@ -123,6 +123,8 @@ def train_weak_learner(
             "length of right/response window": length_r,
             "shape of linear operator M": linear_operator.shape,
             "least squares weight": weight,
+            "score": model.oob_score_,
+            "score type": "r2",
             ** kwargs
         }
             

@@ -16,6 +16,10 @@ def train_honest_forward( subset = slice( None )):
 
     import numpy as np
     model = require.single( "honest_forward" )
+
+    n_estimators = 100
+    max_depth = 20
+    max_features = 1.0
     
     def main( weak_learner_node: nodes.find( "train_weak_learner" ).given( 
             
@@ -25,12 +29,25 @@ def train_honest_forward( subset = slice( None )):
             length_r = 1, 
             linear_operator = np.identity( 1 ),
             type = "forest",
-            learner_kwargs = dict( max_depth = 2, max_features = 1.0, n_jobs = 1, n_estimators = 1 )
+            learner_kwargs = dict( max_depth = max_depth, max_features = max_features, n_jobs = -1, n_estimators = n_estimators )
         )):
 
         m = model( )
         learner = weak_learner_node.result
-        m.__dict__.update( learner = learner, info = dict( table = learner.info_dict, theory = learner.theory_info ))
+
+        theory = ""
+        theory += "\n### General\n"
+        theory += f"""This model learns a function between two lagged sliding windows via a random forest 
+        of size ${ n_estimators }$ with a maximum depth of ${ max_depth }$ and a feature ratio of 
+        ${ int( max_features * 100 )}\\%$. Prediction is performed in an iterative forward fashion 
+        (hence the name *honest*): the target dataframe on which we predict is only used for the necessary 
+        burn-in period of the left window, the rest is predicted on its own prior output. This property makes it
+        easy to validate against out-of-sample time series."""
+        theory += "\n### Training dimensions\n"
+        theory += learner.theory_info
+        theory += f"In this case the linear operator corresponds to $M=I_{{1,1}}$, the $1 \\times 1$ identity matrix."
+            
+        m.__dict__.update( learner = learner, info = dict( table = learner.info_dict, theory = theory ))
         return m
 
     return main

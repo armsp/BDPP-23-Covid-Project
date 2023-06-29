@@ -30,6 +30,36 @@ path {
     shape-rendering: crispEdges;
 }
 
+main {
+
+    width: 700px;
+}
+
+main table {
+  border-collapse: collapse;
+  /*width: 100%;*/
+  margin-bottom: 16px;
+}
+
+main th,
+main td {
+  border: 1px solid #dfe2e5;
+  padding: 6px 13px;
+}
+
+main th {
+  background-color: #f3f4f6;
+  text-align: left;
+}
+
+main tr:nth-child(even) {
+  background-color: #f9fafb;
+}
+
+main tr:hover {
+  background-color: #f6f8fa;
+}
+
 .fade-in {
 
     position: sticky;
@@ -175,7 +205,7 @@ function objectToMarkdownTable(obj) {
 
   // Create table header
   markdownTable += '| Key | Value |\n';
-  markdownTable += '| --- | ----- |\n';
+  markdownTable += '| ---: | :----: |\n';
 
   // Create table rows
   for (let i = 0; i < keys.length; i++) {
@@ -192,11 +222,14 @@ function update_model_info( model_info ) {
     const theory = model_info.theory;
 
     let md = "";
-    md += "# Model Info\n";
-    md += "### Theory\n";
-    md += theory + "\n";
-    md += "### Parameters\n";
+    md += `# Model: \`${ method }\`\n`;
+    md += "## Theory\n";
+    md += theory.replaceAll( ".", ". " ).replaceAll( ",", ", " ) + "\n";
+    md += "## Parameters\n";
     md += objectToMarkdownTable( table );
+
+    console.log( theory );
+    window.theory = theory;
 
     render_markdown( md );
 }
@@ -300,9 +333,10 @@ function render_markdown( txt ) {
     const model_info = d3.select( ".model_info" );
     model_info.append( "textarea" ).text( txt );
     texme.renderPage( );
+    document.title = "Covid Counterfactual";
 }
 
-render_markdown( `## Model Explanation` );
+render_markdown( `` );
 
 </script>
 </body>
