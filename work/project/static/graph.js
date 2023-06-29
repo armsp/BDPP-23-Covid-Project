@@ -489,27 +489,3 @@ return {
 };
 
 }
-
-/*
-TODO: inter-plot cursor √
-- legend for categorical data √
-- date cursor √
-- cache trained models on disk using the node system √
-- transmit logs before end of event handler (python) √
-- length check of time series (cropping to valid range may have changed length) √
-- determine effective predicted range √
-- introduce alternative model (window regression) √
-    - ditch hospitalization rate: not enough countries covered (find a way to switch back and forth) √
-    - train on many more countries and regions
-    - add forward prediction to ensemble
-- introduce model evaluation during training using cross validation
-- introduce confidence
-- write: why linear model is not robust against low-evidence data
-- normalize threshold for automatic prediction range √
-- display prediction progress √
-- write: how to use the app
-- write: why ditch hospitalization data
-- write: documentation for each file, especially the require, nodes, etc. lot
-- add self-managed .gitignore for nodes (if cached nodes are small enough)
-- add node visualization tool
-*/

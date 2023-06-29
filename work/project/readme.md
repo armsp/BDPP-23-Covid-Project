@@ -38,3 +38,24 @@ The general direction we want to take in this project is outlined [here](https:/
 ## Unrelated IP
 
 The code is backed by a computation graph system (aka `./node.py` system) that employs a fully automated smart caching scheme (`./cache.py`) for intermediate results. This system is hungry on disk space, so cleaning old results in the `./node_cache` directory may be necessary once in a while. Check disk space availability with `du -h . | sort -h`. For development, a hybrid notebook/python file system is employed via `./writefile2.py`, which simplifies combining notebooks with each other and with other python code. To reload development modules at (interactive) runtime without restarting the kernel `./require.py` is used to automatically determine the necessity of reloading another imported (or `require`'d) module. To ensure consistency and provide minimal documentation across cumputation stages, `./typesystem.py` and `./typed.py` ensure simple definition and checking of result types, respectively. This last feature is not used on the application level in this project.
+
+### TODO
+
+- [x] display prediction progress
+- [x] introduce alternative model (plain old window regression)
+- [x] ditch hospitalization rate: not enough countries covered (find a way to switch back and forth)
+- [x] write: documentation for each file, especially the require, nodes, etc. lot
+- [ ] train on many more countries and regions
+- [ ] add forward prediction scheme to ensemble
+- [ ] introduce model evaluation during training using cross validation
+- [ ] introduce confidence
+- [ ] write: why linear model is not robust against low-evidence data
+- [ ] normalize threshold for automatic prediction range
+- [ ] write: how to use the app
+- [ ] write: why ditch hospitalization data
+
+#### unrelated IP todo
+
+- [ ] self-managed .gitignore for nodes (if cached nodes are small enough)
+- [ ] node visualization tool
+- [ ] node cache cleaning tool
