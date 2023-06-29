@@ -507,4 +507,6 @@ TODO: inter-plot cursor √
 - normalize threshold for automatic prediction range √
 - display prediction progress √
 - write: how to use the app
+- write: why ditch hospitalization data
+- write: documentation for each file, especially the require, nodes, etc. lot
 */
