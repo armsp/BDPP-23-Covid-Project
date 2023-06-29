@@ -9,6 +9,8 @@ import nodes
 from IPython.display import display, HTML
 
 """
+collects training data from a selection of countries as a list of dataframes
+
 Note: by cropping here we loose some data (temporally), 
 but we use the dataframe for window processing and need NaN-free series
 """

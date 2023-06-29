@@ -4,6 +4,15 @@ source: data_for_country_h.ipynb
 """
 
 
+"""
+gather data for each country, joining the OWID and Oxford data set.
+most of this code is plotting.
+use owid_outcomes.py, owid_measures.py and indicators.py to describe what data you include.
+if you change indicators.py, make sure also to update the 'legend' directory, which
+contains the descriptions for indicators (important for the frontend)
+
+"""
+
 import pandas as pd
 from IPython.display import display, HTML
 import matplotlib.pyplot as plt

@@ -4,6 +4,13 @@ source: crop_to_valid_range_h.ipynb
 """
 
 
+"""
+extract the range from the first non-nan (inclusive) to the first again nan (exclusive).
+this is a heuristic to get a mostly-valid data range for a country data frame, so
+we can train our models on them.
+also used to discard/warn for countries which have no usable data (e.g. entire column is nan)
+"""
+
 import require
 import numpy as np
 from IPython.display import display, HTML

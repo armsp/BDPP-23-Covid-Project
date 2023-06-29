@@ -1,3 +1,9 @@
+"""
+for each column that is contained in indicators, create new dummy (binary 0/1) columns 
+that represent (and replace) the indicator column in terms of absence/presence of each 
+possible categorical value over time
+"""
+
 import require
 indicators = require.single( "indicators" )
 

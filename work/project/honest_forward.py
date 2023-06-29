@@ -4,6 +4,12 @@ source: train_honest_forward.ipynb
 """
 
 
+"""
+trains a single weak learner. the prediction scheme is an honest forward-prediction
+where the sliding window eventually operates on its on predictions after a 
+burn-in phase.
+"""
+
 import require
 import numpy as np
 train_weak_learner = require.single( "train_weak_learner" )

@@ -1,3 +1,8 @@
+"""
+caveman implementation of a system-wide verbosity setting. 
+each kernel initializes with the lowest verbosity
+"""
+
 def level( ):
 
 	with open( "verbose.txt", "r" ) as file:
