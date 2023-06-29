@@ -208,7 +208,7 @@ def predict( args ):
     if start is None:
 
         log( "nothing to be done" )
-        return [ df_to_csvs( df ), None ]
+        return [ df_to_csvs( df ), None, model.info ]
 
     else:
 
@@ -218,7 +218,7 @@ def predict( args ):
         assert not df_pred.isna( ).any( ).any( )
         
         log( "done" )
-        return [ df_to_csvs( df_pred ), str( start )]
+        return [ df_to_csvs( df_pred ), str( start ), model.info ]
 
 def log( * args ):
 

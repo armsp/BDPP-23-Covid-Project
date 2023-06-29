@@ -22,11 +22,10 @@ def window_patches(
     ):
 
     import numpy as np
-    from IPython.display import display, Markdown as md
     from tqdm import tqdm
+    from types import SimpleNamespace as ns
     import sys
     import require
-    verbose = require.untracked.single( "verbose" )
     n_outcomes = len( require.single( "owid_outcomes" ))
     get_number_of_window_samples = require.single( "get_number_of_window_samples" )
 
@@ -76,22 +75,23 @@ def window_patches(
         M = np.kron( linear_operator, np.identity( n_outcomes ))
         Y = Z @ M.T
 
-        if verbose( ):
-    
-            s = [
-                "### Theory\n",
-                f"Consider the predictor windows $L \in \mathbb{{R}}^{{{ L.shape }}}$ and response windows $R \in \mathbb{{R}}^{{{ R.shape }}}$.",
-                f"Let $X \in \mathbb{{R}}^{{{ X.shape }}}$ be a reshaping of $L$ which is directly passed into the model as predictor sample matrix.",
-                f"Let latent response $Z \in \mathbb{{R}}^{{{ Z.shape }}}$ be a reshaping of $R$. As the name suggests, this is not given to the model.",
-                f"Instead, the model observes a linear transformation of $Z$: We have $Y \in \mathbb{{R}}^{{{ Y.shape }}}=Z (M \otimes I_{{{ n_outcomes }}})^\\top$.",
-                f"This applies the linear operator $M \in \mathbb{{R}}^{{{ linear_operator.shape }}}$ to every outcome time series window.",
-                f"Hence, the weak learner learns a function $f: \mathbb{{R}}^{{{ L.shape[ 1: ]}}} \\rightarrow \mathbb{{R}}^{{{( linear_operator.shape[ 0 ], n_outcomes )}}}$,",
-                f"where $f(x)=y=Mz$."
-            ]
+        info = "".join([
             
-            display( md( " ".join( s )))
+            f"Consider the predictor windows $L \in \mathbb{{R}}^{{{ L.shape }}}$ and response windows $R \in \mathbb{{R}}^{{{ R.shape }}}$.",
+            f"Let $X \in \mathbb{{R}}^{{{ X.shape }}}$ be a reshaping of $L$ which is directly passed into the model as predictor sample matrix.",
+            f"Let latent response $Z \in \mathbb{{R}}^{{{ Z.shape }}}$ be a reshaping of $R$. As the name suggests, this is not given to the model.",
+            f"Instead, the model observes a linear transformation of $Z$: We have $Y \in \mathbb{{R}}^{{{ Y.shape }}}=Z (M \otimes I_{{{ n_outcomes }}})^\\top$.",
+            f"This applies the linear operator $M \in \mathbb{{R}}^{{{ linear_operator.shape }}}$ to every outcome time series window.",
+            f"Hence, the weak learner learns a function $f: \mathbb{{R}}^{{{ L.shape[ 1: ]}}} \\rightarrow \mathbb{{R}}^{{{( linear_operator.shape[ 0 ], n_outcomes )}}}$,",
+            f"where $f(x)=y=Mz$."
+        ])
 
-        return X, Y
+        return ns( 
+            
+            X = X, 
+            Y = Y, 
+            info = info 
+        )
     
     return main
 

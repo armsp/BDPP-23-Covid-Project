@@ -17,7 +17,6 @@ def train_honest_forward( subset = slice( None )):
     import numpy as np
     model = require.single( "honest_forward" )
     
-    
     def main( weak_learner_node: nodes.find( "train_weak_learner" ).given( 
             
             subset = subset, 
@@ -26,11 +25,12 @@ def train_honest_forward( subset = slice( None )):
             length_r = 1, 
             linear_operator = np.identity( 1 ),
             type = "forest",
-            learner_kwargs = dict( max_depth = 20, max_features = 1.0, n_jobs = -1, n_estimators = 100 )
+            learner_kwargs = dict( max_depth = 2, max_features = 1.0, n_jobs = 1, n_estimators = 1 )
         )):
 
         m = model( )
-        m.__dict__.update( learner = weak_learner_node.result )
+        learner = weak_learner_node.result
+        m.__dict__.update( learner = learner, info = dict( table = learner.info_dict, theory = learner.theory_info ))
         return m
 
     return main

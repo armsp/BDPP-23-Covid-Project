@@ -5,8 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title></title>
 </head>
+
 <body>
-    
+<script>window.texme = { renderOnLoad: false, style: "none" }</script>
+<script src="https://cdn.jsdelivr.net/npm/texme@1.2.2"></script>    
 <style> /* set the CSS */
 
 body { font: 12px Arial;}
@@ -145,7 +147,7 @@ function do_prediction( ) {
 
     const args = [ all_data, country, method ];
     console.log( method );
-    socket.emit( "predict", args, callback = ([ predicted, pred_start_index ]) => { 
+    socket.emit( "predict", args, callback = ([ predicted, pred_start_index, model_info ]) => { 
 
         graphs.forEach( graph => {
 
@@ -159,8 +161,44 @@ function do_prediction( ) {
 
         //if the data was changed in the meantime, we must predict again right away
         if( version != version_old ) setTimeout( do_prediction, 0 );
+        update_model_info( model_info );        
+
         locked = false;
     });    
+}
+
+function objectToMarkdownTable(obj) {
+  const keys = Object.keys(obj);
+  const values = Object.values(obj);
+
+  let markdownTable = '';
+
+  // Create table header
+  markdownTable += '| Key | Value |\n';
+  markdownTable += '| --- | ----- |\n';
+
+  // Create table rows
+  for (let i = 0; i < keys.length; i++) {
+    markdownTable += `| ${keys[i]} | ${values[i]} |\n`;
+  }
+
+  return markdownTable;
+}
+
+
+function update_model_info( model_info ) {
+    
+    const table = Object.fromEntries( Object.entries( model_info.table ).filter(([ k, v ]) => ! k.includes( "samples from" )));
+    const theory = model_info.theory;
+
+    let md = "";
+    md += "# Model Info\n";
+    md += "### Theory\n";
+    md += theory + "\n";
+    md += "### Parameters\n";
+    md += objectToMarkdownTable( table );
+
+    render_markdown( md );
 }
 
 function data_changed_callback( from_column ) {
@@ -253,6 +291,18 @@ measures
 d3.select( ".tables" ).append( "div" ).attr( "class" , "fade-out" ); 
 
 d3.select( "body" ).append( "div" ).attr( "class" , "date" );
+
+d3.select( "body" ).append( "div" ).attr( "class", "model_info" );
+
+function render_markdown( txt ) {
+
+    d3.selectAll( "main" ).data([ ]).join( "p" );
+    const model_info = d3.select( ".model_info" );
+    model_info.append( "textarea" ).text( txt );
+    texme.renderPage( );
+}
+
+render_markdown( `## Model Explanation` );
 
 </script>
 </body>

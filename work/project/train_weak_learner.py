@@ -32,6 +32,7 @@ def train_weak_learner(
     import sys
     from types import SimpleNamespace as ns
     import os
+    import math
         
     weak_learner = require.single( "weak_learner" )
     get_number_of_window_samples = require.single( "get_number_of_window_samples" )
@@ -60,7 +61,8 @@ def train_weak_learner(
         ):
 
         self = weak_learner( )
-        X, Y = patches_node.result
+        X = patches_node.result.X
+        Y = patches_node.result.Y
         
         dataframes = training_data_node.result[ subset ] #currently simple slice indexing
 
@@ -68,69 +70,69 @@ def train_weak_learner(
         d = dataframes[ 0 ].shape[ 1 ]
         get_n_samples = lambda df: get_number_of_window_samples( df, length_l, lag, length_r )
         n_samples_total = sum([ get_n_samples( df ) for df in dataframes ])
-    
+
+        print( "training..." )
+            
+        if type == "lm":
+            
+            from sklearn.linear_model import LinearRegression as lm
+            return lm( ** learner_kwargs ).fit( X, Y )
+
+        if type == "forest":
+
+            from sklearn.ensemble import RandomForestRegressor as rf
+
+            kwargs = learner_kwargs
+            args = ns( ** kwargs )
+            
+            if not hasattr( args, "n_jobs" ): 
+                
+                args.n_jobs = 1
+            
+            if args.n_jobs < 0:
+
+                args.n_jobs = os.cpu_count( ) + 1 + args.n_jobs
+
+            if not hasattr( args, "n_estimators" ):
+
+                args.n_estimators = 100
+
+            n_estimators = args.n_estimators
+            n_jobs = args.n_jobs
+            kwargs = args.__dict__
+            print( kwargs )
+            model = rf( warm_start = True, ** kwargs )
+            
+            n_steps = int( math.ceil( n_estimators / n_jobs ))
+            for i in tqdm( range( n_steps ), file = sys.stdout, desc = "training estimators" ):
+
+                model.set_params( n_estimators = n_jobs * ( i + 1 ))
+                model.fit( X, Y )    
+
+        print( "done" )
+            
+        info_dict = {
+                
+            "number of dataframes": len( dataframes ),
+            ** { f"samples from dataframe { i }": get_n_samples( dataframes[ i ]) for i in range( len( dataframes ))},
+            "total number of samples": n_samples_total,
+            "number of time series": d,
+            "number of outcome series": n_outcomes,
+            "length of left/predictor window": length_l, 
+            "lag/spacing between windows": lag, 
+            "length of right/response window": length_r,
+            "shape of linear operator M": linear_operator.shape,
+            "least squares weight": weight,
+            ** kwargs
+        }
+            
         if verbose( ):
     
             display( HTML( f"<h1>Weak Learner Training</h1>" ))
             display( HTML( f"<h3>Parameters</h3>" ))
-            
-            display_dict({
-                
-                "number of dataframes": len( dataframes ),
-                ** { f"samples from dataframe { i }": get_n_samples( dataframes[ i ]) for i in range( len( dataframes ))},
-                "total number of samples": n_samples_total,
-                "number of time series": d,
-                "number of outcome series": n_outcomes,
-                "length of left/predictor window": length_l, 
-                "lag/spacing between windows": lag, 
-                "length of right/response window": length_r,
-                "shape of linear operator M": linear_operator.shape,
-                "least squares weight": weight
-            })
-    
-        def get_weak_learner( X, Y ):
-
-            if type == "lm":
-            
-                from sklearn.linear_model import LinearRegression as lm
-                return lm( ** learner_kwargs ).fit( X, Y )
-
-            if type == "forest":
-
-                from sklearn.ensemble import RandomForestRegressor as rf
-
-                args = ns( ** learner_kwargs )
-                
-                if not hasattr( args, "n_jobs" ): 
-                    
-                    args.n_jobs = 1
-                
-                if args.n_jobs < 0:
-
-                    args.n_jobs = os.cpu_count( ) + 1 + args.n_jobs
-
-                if not hasattr( args, "n_estimators" ):
-
-                    args.n_estimators = 100
-
-                n_estimators = args.n_estimators
-                n_jobs = args.n_jobs
-                print( args.__dict__ )
-                del args.n_estimators
-
-                n_steps = int( n_estimators / n_jobs )
-                m = rf( warm_start = True, ** args.__dict__ )
-
-                for i in tqdm( range( n_steps ), file = sys.stdout, desc = "training estimators" ):
-
-                    m.set_params( n_estimators = n_jobs * ( i + 1 ))
-                    m.fit( X, Y )
-                
-                return m        
-        
-        print( "training..." )
-        model = get_weak_learner( X, Y )
-        print( "done" )
+            display_dict( info_dict )
+            display( HTML( f"<h3>Theory</h3>" ))
+            display( md( patches_node.result.info ))            
     
         self.__dict__.update( 
 
@@ -141,7 +143,9 @@ def train_weak_learner(
             linear_operator = linear_operator,
             weight = weight,
             d = d,
-            n_outcomes = n_outcomes
+            n_outcomes = n_outcomes,
+            theory_info = patches_node.result.info,
+            info_dict = info_dict
         )
 
         return self
