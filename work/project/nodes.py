@@ -12,7 +12,7 @@ from typed import typed
 import require
 
 ts = create_typesystem( prefix = "node_" )
-cache = create_cache( "node_cache", version = hash_deps( "typesystem", __name__ ))
+cache = create_cache( "/node_cache", version = hash_deps( "typesystem", __name__ ))
 node_base_t = ts.create_type(( ), dict( ), key = "node_base", allow_duplicates = True )
 node_generic_base_t = ts.create_type(( ), dict( ), key = "node_generic_base", allow_duplicates = True )
 bytecode_t = type(( lambda: None ).__code__ ) #bit hacky

@@ -5,32 +5,16 @@ source: train_honest_forward.ipynb
 
 
 """
-trains a single weak learner. the prediction scheme is an honest forward-prediction
+implements an honest forward-prediction scheme
 where the sliding window eventually operates on its on predictions after a 
 burn-in phase.
 """
 
 import require
 import numpy as np
-train_weak_learner = require.single( "train_weak_learner" )
 n_outcomes = len( require.single( "owid_outcomes" ))
 
 class honest_forward:
-
-    def train( self, train_set ):
-
-        length_r = 1
-        learner = train_weak_learner( 
-        
-            train_set, 
-            length_l = 100, 
-            lag = 50, 
-            length_r = length_r, 
-            linear_operator = np.identity( 1 ),
-            type = "forest"
-        )    
-    
-        self.__dict__.update( learner = learner )
 
     def predict_replace( self, df, start = None, length = None, callback = None ):
 

@@ -84,7 +84,7 @@ def get_countries( ):
 @socketio.event
 def get_methods( ):
     
-    return [ "belief_ensemble", "honest_forward" ]
+    return [ "honest_forward" ]
 
 @socketio.event
 @functools.cache
