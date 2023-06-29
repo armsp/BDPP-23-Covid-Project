@@ -1,4 +1,18 @@
-#mainly due to missing outcomes, no testing data or overall sketchy looking data
+"""
+these are manually filtered (by visual inspection) using the training_data_h.ipynb notebook.
+
+reasons for making it into this list include:
+ - missing outcomes
+ - no or very little testing data
+ - sketchy/ erroneuous looking data (extreme spikes, gaps, plateaus, discontinous data)
+
+note: some of these countries could be recovered merely by smoothing
+
+hospitalization data is NOT considered a requirement to stay off this list.
+there is a separate file listing all the countries that have sufficient hospitalilization data:
+countries_with_hospitalization_data.py
+
+"""
 
 countries_known_to_be_broken = [
 

@@ -1,3 +1,9 @@
+"""
+countries in the OWID (our world in data) data set. some of these are not actually countries, 
+but the algorithm does not care about that.
+"""
+
+
 countries_in_owid = ['Afghanistan', 'Africa', 'Albania', 'Algeria', 'American Samoa',
    'Andorra', 'Angola', 'Anguilla', 'Antigua and Barbuda',
    'Argentina', 'Armenia', 'Aruba', 'Asia', 'Australia', 'Austria',

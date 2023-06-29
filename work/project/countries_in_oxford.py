@@ -1,3 +1,7 @@
+"""
+countries in the oxford covid-19 government response tracker
+"""
+
 countries_in_oxford = ['Aruba', 'Afghanistan', 'Angola', 'Albania', 'Andorra',
        'United Arab Emirates', 'Argentina', 'Australia', 'Austria',
        'Azerbaijan', 'Burundi', 'Belgium', 'Benin', 'Burkina Faso',
