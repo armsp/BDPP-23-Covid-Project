@@ -1,3 +1,9 @@
+"""
+Declares the indicators used from the Oxford dataset and their categorical value range.
+If you change this file, make sure also to update the 'legend' directory, which
+contains the descriptions for indicators (important for the frontend).
+"""
+
 import numpy as np
 from types import SimpleNamespace as ns
 

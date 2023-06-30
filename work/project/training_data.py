@@ -11,6 +11,7 @@ cache node wrapper around compute_training_data.py
 import nodes
 import require
 
+@nodes.store_in_tmp
 @nodes.generic_node
 def training_data( ):
 

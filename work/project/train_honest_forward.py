@@ -17,7 +17,7 @@ def train_honest_forward( subset = slice( None )):
     import numpy as np
     model = require.single( "honest_forward" )
 
-    n_estimators = 100
+    n_estimators = 1
     max_depth = 20
     max_features = 1.0
     
@@ -29,7 +29,7 @@ def train_honest_forward( subset = slice( None )):
             length_r = 1, 
             linear_operator = np.identity( 1 ),
             type = "forest",
-            learner_kwargs = dict( max_depth = max_depth, max_features = max_features, n_jobs = -1, n_estimators = n_estimators )
+            learner_kwargs = dict( max_depth = max_depth, max_features = max_features, n_jobs = 1, n_estimators = n_estimators )
         )):
 
         m = model( )

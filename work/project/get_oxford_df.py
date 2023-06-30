@@ -8,6 +8,12 @@ import pandas as pd
 import numpy as np
 import functools
 
+"""
+reads in a dataframe from the oxford data for a specific country. note the data frame
+has an awkward layout and essentially needs to be transposed and cropped to align
+with the OWID format.
+"""
+
 def get_oxford_df( file, country ):
 
     df = read_oxford_csv( file ).copy( )

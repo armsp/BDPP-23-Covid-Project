@@ -10,6 +10,7 @@ caching node with little additional logic, wrapping compute_data_for_country.py
 import nodes
 import require
 
+@nodes.store_in_tmp
 @nodes.generic_node
 def data_for_country( country, categorical_as_dummy = True ):
 

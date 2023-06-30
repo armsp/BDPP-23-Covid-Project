@@ -11,6 +11,7 @@ window lengths, lag and linear operator
 
 import nodes
 
+@nodes.store_in_tmp
 @nodes.generic_node
 def window_patches( 
     

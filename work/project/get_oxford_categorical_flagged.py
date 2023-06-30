@@ -11,6 +11,10 @@ import require
 import os
 get_oxford_df = require.single( "get_oxford_df" )
 
+"""
+for categorical oxford data frames, mask the time series with its corresponding flag. details below.
+"""
+
 def get_oxford_categorical_flagged( country, indicator, verbose = True ):
 
     series_file = f"data/{ indicator }.csv"

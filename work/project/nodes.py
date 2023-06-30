@@ -12,7 +12,9 @@ from typed import typed
 import require
 
 ts = create_typesystem( prefix = "node_" )
-cache = create_cache( "/node_cache", version = hash_deps( "typesystem", __name__ ))
+version = hash_deps( "typesystem", __name__ )
+cache = create_cache( "node_cache", version = version )
+tmp_cache = create_cache( "/tmp/node_cache", version = version )
 node_base_t = ts.create_type(( ), dict( ), key = "node_base", allow_duplicates = True )
 node_generic_base_t = ts.create_type(( ), dict( ), key = "node_generic_base", allow_duplicates = True )
 bytecode_t = type(( lambda: None ).__code__ ) #bit hacky
@@ -51,6 +53,7 @@ def create_generic_node( generic_declarator_func, generic_name: str ):
     generic_sig = inspect.signature( generic_declarator_func )
     node_generic_uuid = md5_hash( generic_name + str( generic_sig ) + get_fn_source_hash( generic_declarator_func ))
     node_generic_t = ts.create_type(( node_generic_base_t, ), dict( ), readonly = False, key = f"generic_node<{ generic_name }, { node_generic_uuid }>", allow_duplicates = True )
+    cache_location = None
     
     generic_doc = textwrap.dedent( f"""\
 
@@ -70,6 +73,16 @@ def create_generic_node( generic_declarator_func, generic_name: str ):
         txt = str( value )
         txt = txt.replace( ".", "?" )
         return txt
+
+    def get_cache( ):
+
+        cache_locations = { "local": cache, "/tmp": tmp_cache }
+        
+        if cache_location in cache_locations:
+
+            return cache_locations[ cache_location ]
+
+        return cache_locations[ "local" ]
     
     def generic_specialize( * args, ** kwargs ):
         
@@ -99,11 +112,11 @@ def create_generic_node( generic_declarator_func, generic_name: str ):
         
         def get( ):
             
-            return cache.get( get_cache_key( ), get_raw )
+            return get_cache( ).get( get_cache_key( ), get_raw )
         
         def clear( ):
         
-            return cache.delete( get_cache_key( ))
+            return get_cache( ).delete( get_cache_key( ))
         
         def get_cache_key( ):
             
@@ -162,12 +175,18 @@ def create_generic_node( generic_declarator_func, generic_name: str ):
 
     def generic_clear( ):
         
-        return cache.delete( node_generic_uuid )
+        return get_cache( ).delete( node_generic_uuid )
+
+    def store_in_tmp( ):
+
+        nonlocal cache_location
+        cache_location = "/tmp";
     
     node_generic_t.get = lambda * args, ** kwargs: node_generic_t.given( * args, ** kwargs ).get( )
     node_generic_t.get_result = lambda * args, ** kwargs: node_generic_t.given( * args, ** kwargs ).get_result( )
     node_generic_t.get_cache_key = lambda * args, ** kwargs: node_generic_t.given( * args, ** kwargs ).get_cache_key( )
     node_generic_t.clear = generic_clear
+    node_generic_t.store_in_tmp = store_in_tmp
     
     return node_generic_t
     
@@ -202,8 +221,6 @@ def generic_node( generic_declarator_func ):
     return create_generic_node( generic_declarator_func, generic_declarator_func.__name__ )
 
 def find( module_name, node_name = None ):
-    
-    node_name = "node" if node_name is None else node_name
 
     # untracked, since the nodes have their own invalidation mechanism
     mod = require.module( module_name, untracked = True )
@@ -216,7 +233,20 @@ def find( module_name, node_name = None ):
             if issubclass( node, node_base_t ) or issubclass( node, node_generic_base_t ):
                 
                 return node
+
+    if node_name is None:
+
+        node = try_attribute( "node" ) or try_attribute( module_name )
+
+    else:
+
+        node = try_attribute( f"{ node_name }_node" ) or try_attribute( f"node_{ node_name }" )
     
-    node = try_attribute( f"{ node_name }_node" ) or try_attribute( f"node_{ node_name }" ) or try_attribute( node_name )
     assert not node is None, f"could not find node '{ node_name }' in module '{ module_name }'"
     return node
+
+# decorate
+def store_in_tmp( generic_node ):
+
+    generic_node.store_in_tmp( )
+    return generic_node

@@ -12,6 +12,7 @@ trigger this node with verbose settings to see some diagnostic and theory output
 import nodes
 import require
 
+@nodes.store_in_tmp
 @nodes.generic_node
 def train_weak_learner( 
 
