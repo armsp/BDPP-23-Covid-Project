@@ -12,24 +12,29 @@ import nodes
 import require
 
 @nodes.generic_node
-def train_honest_forward( subset = slice( None )):
+def train_honest_forward( 
+    
+        subset = None, 
+        n_estimators = 1,
+        max_depth = 20,
+        max_features = 1.0,
+        n_jobs = -1,
+        length_l = 100,
+        lag = 50
+    ):
 
     import numpy as np
     model = require.single( "honest_forward" )
-
-    n_estimators = 1
-    max_depth = 20
-    max_features = 1.0
     
     def main( weak_learner_node: nodes.find( "train_weak_learner" ).given( 
             
             subset = subset, 
-            length_l = 100, 
-            lag = 50, 
+            length_l = length_l, 
+            lag = lag, 
             length_r = 1, 
             linear_operator = np.identity( 1 ),
             type = "forest",
-            learner_kwargs = dict( max_depth = max_depth, max_features = max_features, n_jobs = 1, n_estimators = n_estimators )
+            learner_kwargs = dict( n_estimators = n_estimators, max_depth = max_depth, max_features = max_features, n_jobs = n_jobs )
         )):
 
         m = model( )

@@ -1,0 +1,56 @@
+"""
+list of countries that is considered WEIRD.
+the corresponding chatGPT 3.5 prompt was an original list of countries and the comment
+'[...] in the same JSON format, output a list of countries that is considered western or european or industrialized'
+"""
+
+countries_considered_weird = [
+  
+  "Albania",
+  "Andorra",
+  "Austria",
+  "Belgium",
+  "Bosnia and Herzegovina",
+  "Bulgaria",
+  "Croatia",
+  "Cyprus",
+  "Czechia",
+  "Denmark",
+  "Estonia",
+  "Faroe Islands",
+  "Finland",
+  "France",
+  "Germany",
+  "Gibraltar",
+  "Greece",
+  "Guernsey",
+  "Hungary",
+  "Iceland",
+  "Ireland",
+  "Isle of Man",
+  "Italy",
+  "Jersey",
+  "Kosovo",
+  "Latvia",
+  "Liechtenstein",
+  "Lithuania",
+  "Luxembourg",
+  "Malta",
+  "Monaco",
+  "Montenegro",
+  "Netherlands",
+  "North Macedonia",
+  "Norway",
+  "Poland",
+  "Portugal",
+  "Romania",
+  "San Marino",
+  "Serbia",
+  "Slovakia",
+  "Slovenia",
+  "Spain",
+  "Sweden",
+  "Switzerland",
+  "United Kingdom",
+  "Vatican"
+]

@@ -51,6 +51,7 @@ The code is backed by a computation graph system (aka `./node.py` system) that e
 - [ ] write: why ditch hospitalization data
 - [ ] write: why linear model is not robust against low-evidence data
 - [ ] find some way to add trained models to deliverable
+- [ ] demonstrate how the honest_forward model only works in WEIRD countries (some correlation plot for GDP)
 
 #### maybe 
 - [ ] introduce confidence

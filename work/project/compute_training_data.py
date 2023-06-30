@@ -7,6 +7,7 @@ from tqdm import tqdm
 import sys
 import nodes
 from IPython.display import display, HTML
+from types import SimpleNamespace as ns
 
 """
 collects training data from a selection of countries as a list of dataframes
@@ -22,10 +23,12 @@ verbose = require.untracked.single( "verbose" )
 owid_countries = require.single( "countries_in_owid" )
 oxford_countries = require.single( "countries_in_oxford" )
 broken_countries = require.single( "countries_known_to_be_broken" )
+learnable_countries = require.single( "countries_with_high_r2" )
 
 def compute_training_data( ):
 
-    countries = list( set( owid_countries ).intersection( oxford_countries ).difference( broken_countries ))
+    countries = learnable_countries
+    countries.sort( )
     
     if verbose( ):
 
@@ -42,7 +45,7 @@ def compute_training_data( ):
 
         df = compute_data_for_country( country )
         df = crop_to_valid_range( df ).copy( ) 
-        dataframes.append( df )
+        dataframes.append( ns( df = df, country = country ))
 
     return dataframes
         

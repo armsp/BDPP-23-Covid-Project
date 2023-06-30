@@ -29,18 +29,19 @@ def window_patches(
     import require
     n_outcomes = len( require.single( "owid_outcomes" ))
     get_number_of_window_samples = require.single( "get_number_of_window_samples" )
+    subset_indexing = require.single( "subset_indexing" )
 
     def main( training_data_node: nodes.find( "training_data" ).given( )):
 
-        dataframes = training_data_node.result[ subset ] #currently simple slice indexing
+        trainset = subset_indexing( training_data_node.result, subset )
         get_n_samples = lambda df: get_number_of_window_samples( df, length_l, lag, length_r )
     
-        n_samples_total = sum([ get_n_samples( df ) for df in dataframes ])
-        d = dataframes[ 0 ].shape[ 1 ]
+        n_samples_total = sum([ get_n_samples( point.df ) for point in trainset ])
+        d = trainset[ 0 ].df.shape[ 1 ]
         
-        for i, df in enumerate( dataframes ):
+        for i, point in enumerate( trainset ):
     
-            assert get_n_samples( df ) >= 1, f"dataframe { df } at index { i } is too short"    
+            assert get_n_samples( point.df ) >= 1, f"dataframe { point.df } at index { i } is too short"    
     
         assert linear_operator.shape[ 1 ] == length_r, f"linear_operator of shape { linear_operator.shape } cannot be applied to a window of shape { length_r, n_outcomes }"
     
@@ -59,8 +60,9 @@ def window_patches(
         start_index = 0
         with tqdm( file = sys.stdout, desc = "assembling patches", total = n_samples_total ) as bar:
             
-            for df in dataframes:
-        
+            for point in trainset:
+
+                df = point.df
                 n_samples = get_n_samples( df )
                 
                 for t in range( n_samples ):

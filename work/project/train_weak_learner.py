@@ -40,6 +40,7 @@ def train_weak_learner(
     display_dict = require.untracked.single( "display_dict" )
     verbose = require.untracked.single( "verbose" )
     n_outcomes = len( require.single( "owid_outcomes" ))
+    subset_indexing = require.single( "subset_indexing" )
 
     if linear_operator is None:
 
@@ -65,12 +66,12 @@ def train_weak_learner(
         X = patches_node.result.X
         Y = patches_node.result.Y
         
-        dataframes = training_data_node.result[ subset ] #currently simple slice indexing
+        trainset = subset_indexing( training_data_node.result, subset )
 
         #number of time series
-        d = dataframes[ 0 ].shape[ 1 ]
+        d = trainset[ 0 ].df.shape[ 1 ]
         get_n_samples = lambda df: get_number_of_window_samples( df, length_l, lag, length_r )
-        n_samples_total = sum([ get_n_samples( df ) for df in dataframes ])
+        n_samples_total = sum([ get_n_samples( point.df ) for point in trainset ])
 
         print( "training..." )
             
@@ -114,8 +115,8 @@ def train_weak_learner(
             
         info_dict = {
                 
-            "number of dataframes": len( dataframes ),
-            ** { f"samples from dataframe { i }": get_n_samples( dataframes[ i ]) for i in range( len( dataframes ))},
+            "number of dataframes": len( trainset ),
+            ** { f"samples from dataframe { i }": get_n_samples( trainset[ i ].df ) for i in range( len( trainset ))},
             "total number of samples": n_samples_total,
             "number of time series": d,
             "number of outcome series": n_outcomes,
