@@ -50,6 +50,7 @@ The code is backed by a computation graph system (aka `./node.py` system) that e
 - [ ] write: how to use the app
 - [ ] write: why ditch hospitalization data
 - [ ] write: why linear model is not robust against low-evidence data
+- [ ] find some way to add trained models to deliverable
 
 #### maybe 
 - [ ] introduce confidence
@@ -57,6 +58,5 @@ The code is backed by a computation graph system (aka `./node.py` system) that e
 
 #### unrelated IP todo
 
-- [ ] find some way to add trained models to deliverable
 - [ ] node visualization tool
 - [ ] node cache cleaning tool
