@@ -35,9 +35,9 @@ The data finder is a collection of urls for all the different data required.
 
 The general direction we want to take in this project is outlined [here](https://docs.google.com/document/d/1nTZxaHd7YsTs8NGOBT5wBXATSmV-iW3Yf0dg_U_U9kY/edit).
 
-## Unrelated IP
+## Unrelated intellectual property
 
-The code is backed by a computation graph system (aka `./node.py` system) that employs a fully automated smart caching scheme (`./cache.py`) for intermediate results. This system is hungry on disk space, so cleaning old results in the `./node_cache` directory may be necessary once in a while. Check disk space availability with `du -h . | sort -h`. For development, a hybrid notebook/python file system is employed via `./writefile2.py`, which simplifies combining notebooks with each other and with other python code. To reload development modules at (interactive) runtime without restarting the kernel `./require.py` is used to automatically determine the necessity of reloading another imported (or `require`'d) module. To ensure consistency and provide minimal documentation across cumputation stages, `./typesystem.py` and `./typed.py` ensure simple definition and checking of result types, respectively. This last feature is not used on the application level in this project.
+The code is backed by a computation graph system (aka `./node.py` system) that employs a fully automated smart caching scheme (`./cache.py`) for intermediate results. This system is hungry on disk space, so cleaning old results in the `./node_cache` directory may be necessary once in a while. Check disk space availability with `du -h . | sort -h`. For development, a hybrid notebook/python file system is employed via `./writefile2.py`, which simplifies combining notebooks with each other and with other python code. To reload development modules at (interactive) runtime without restarting the kernel `./require.py` is used to automatically determine the necessity of reloading another imported (or `require`'d) module. To ensure consistency and provide minimal documentation across cumputation stages, `./typesystem.py` and `./typed.py` ensure simple definition and checking of result types, respectively. 
 
 ### TODO
 
@@ -46,16 +46,17 @@ The code is backed by a computation graph system (aka `./node.py` system) that e
 - [x] ditch hospitalization rate: not enough countries covered (find a way to switch back and forth)
 - [x] write: documentation for each file, especially the require, nodes, etc. lot
 - [x] train on many more countries and regions
-- [ ] add forward prediction scheme to ensemble
-- [ ] introduce model evaluation during training using cross validation
-- [ ] introduce confidence
-- [ ] write: why linear model is not robust against low-evidence data
-- [x] normalize threshold for automatic prediction range
+- [ ] introduce model evaluation during training using cross validation against out-of-sample time series
 - [ ] write: how to use the app
 - [ ] write: why ditch hospitalization data
+- [ ] write: why linear model is not robust against low-evidence data
+
+#### maybe 
+- [ ] introduce confidence
+- [x] normalize threshold for automatic prediction range
 
 #### unrelated IP todo
 
-- [ ] self-managed .gitignore for nodes (if cached nodes are small enough)
+- [ ] find some way to add trained models to deliverable
 - [ ] node visualization tool
 - [ ] node cache cleaning tool
