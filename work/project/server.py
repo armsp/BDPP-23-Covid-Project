@@ -78,7 +78,8 @@ def get_columns( ):
 
 @socketio.event
 def get_countries( ):
-    
+
+    # a bit outdated, since we do not use hospitalization data, but its a nice set of countries
     return require.single( "countries_with_hospitalization_data" )
 
 @socketio.event
@@ -115,16 +116,11 @@ def csvs_to_df( csvs ):
     return df
 
 
-
+# this should not actually train, but use the disk and ram cache
 @functools.cache
 def train_model( method ):
 
     log( f"training { method }" )
-    
-    if method == "belief_ensemble":
-
-        train_ensemble_node = require.single( "train_ensemble" )
-        return train_ensemble_node.get_result( )
 
     if method == "honest_forward":
 

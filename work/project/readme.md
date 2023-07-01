@@ -9,9 +9,9 @@ We assume you have `pipenv` and `python 3.9` installed on your machine (or [virt
 4. To launch jupyter lab, run `jupyter-lab -y --NotebookApp.token='' --ip='*' --port=8888 --allow-root`. Most of these keyword arguments are required to run smoothly in docker, so if you know better, you might get away without all of them.
 6. If not already, open `localhost:8888` for jupyter lab.
 
-## Server
+## Server / webapp
 
-In a second pipenv shell, run `is_server=1 watchmedo auto-restart -p "server.py" -R python3 -- server.py` for an autoreloading server (think nodemon).
+In a second pipenv shell, run `is_server=1 watchmedo auto-restart -p "server.py" -R python3 -- server.py` for an autoreloading server (think nodemon). You can launch this shell from jupyter, Visual Studio Code or by creating a new shell in terminal.
 
 ## Git
 
@@ -37,6 +37,17 @@ The general direction we want to take in this project is outlined [here](https:/
 
 ## Unrelated intellectual property
 
+For this project, ignore the following files. They are important for operations, but considered *development tools* and were not made during the scope of this project:
+
+- `cache.py`
+- `hashing.py`
+- `nodes.py`
+- `require.py`
+- `signature_match_args.py`
+- `typed.py`
+- `typesystem.py`
+- `writefile2.py`
+
 The code is backed by a computation graph system (aka `./node.py` system) that employs a fully automated smart caching scheme (`./cache.py`) for intermediate results. This system is hungry on disk space, so cleaning old results in the `./node_cache` directory may be necessary once in a while. Check disk space availability with `du -h . | sort -h`. For development, a hybrid notebook/python file system is employed via `./writefile2.py`, which simplifies combining notebooks with each other and with other python code. To reload development modules at (interactive) runtime without restarting the kernel `./require.py` is used to automatically determine the necessity of reloading another imported (or `require`'d) module. To ensure consistency and provide minimal documentation across cumputation stages, `./typesystem.py` and `./typed.py` ensure simple definition and checking of result types, respectively. 
 
 ### TODO
@@ -46,16 +57,17 @@ The code is backed by a computation graph system (aka `./node.py` system) that e
 - [x] ditch hospitalization rate: not enough countries covered (find a way to switch back and forth)
 - [x] write: documentation for each file, especially the require, nodes, etc. lot
 - [x] train on many more countries and regions
-- [ ] introduce model evaluation during training using cross validation against out-of-sample time series
+- [x] introduce model evaluation during training using cross validation against out-of-sample time series
 - [ ] write: how to use the app
 - [ ] write: why ditch hospitalization data
-- [ ] write: why linear model is not robust against low-evidence data
+- [ ] write: why linear model is not robust against low-evidence data and switch to random forest
 - [ ] find some way to add trained models to deliverable
-- [ ] demonstrate how the honest_forward model only works in WEIRD countries (some correlation plot for GDP)
 
-#### maybe 
+#### maybe / future
 - [ ] introduce confidence
 - [x] normalize threshold for automatic prediction range
+- [ ] evaluation with balanced train/test split (estimate varies strongly with the number of WEIRD countries in test set)
+- [ ] demonstrate how the honest_forward model only works in WEIRD countries (some correlation plot for GDP)
 
 #### unrelated IP todo
 

@@ -16,18 +16,20 @@ Note: by cropping here we loose some data (temporally),
 but we use the dataframe for window processing and need NaN-free series
 """
 
-#TODO: can be replaced by cached nodes
 compute_data_for_country = require.single( "compute_data_for_country" )
 crop_to_valid_range = require.single( "crop_to_valid_range" )
 verbose = require.untracked.single( "verbose" )
 owid_countries = require.single( "countries_in_owid" )
 oxford_countries = require.single( "countries_in_oxford" )
 broken_countries = require.single( "countries_known_to_be_broken" )
-learnable_countries = require.single( "countries_with_high_r2" )
+countries = require.single( "countries_in_europe" )
 
 def compute_training_data( ):
 
-    countries = learnable_countries
+    # all possible countries to train on
+    all_countries = list( set( owid_countries ).intersection( oxford_countries ).difference( broken_countries ))
+    
+    countries = all_countries
     countries.sort( )
     
     if verbose( ):

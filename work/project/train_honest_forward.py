@@ -14,8 +14,8 @@ import require
 @nodes.generic_node
 def train_honest_forward( 
     
-        subset = None, 
-        n_estimators = 1,
+        subset = slice( None ), 
+        n_estimators = 100,
         max_depth = 20,
         max_features = 1.0,
         n_jobs = -1,
@@ -43,7 +43,7 @@ def train_honest_forward(
         theory = ""
         theory += "\n### General\n"
         theory += f"""This model learns a function between two lagged sliding windows via a random forest 
-        of size ${ n_estimators }$ with a maximum depth of ${ max_depth }$ and a feature ratio of 
+        of ${ n_estimators }$ trees each with a maximum depth of ${ max_depth }$ and a feature ratio of 
         ${ int( max_features * 100 )}\\%$. Prediction is performed in an iterative forward fashion 
         (hence the name *honest*): the target dataframe on which we predict is only used for the necessary 
         burn-in period of the left window, the rest is predicted on its own prior output. This property makes it

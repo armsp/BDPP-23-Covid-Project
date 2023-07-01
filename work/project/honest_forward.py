@@ -36,7 +36,7 @@ class honest_forward:
         lag = learner.lag
 
         df_pred = df.copy( )
-        df_pred.iloc[ start:, :n_outcomes ] = np.nan
+        df_pred.iloc[ start : start + length, :n_outcomes ] = np.nan
     
         for i in range( n_predictions ):
     

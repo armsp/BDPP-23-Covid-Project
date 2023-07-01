@@ -48,6 +48,7 @@ def indent( txt, n_tabs ):
 
 #TODO: warn if generic_name is already in use
 #TODO: detect dependency cycles of nodes
+#TODO: dicts with different keyword order are not hashed the same, wasteful
 def create_generic_node( generic_declarator_func, generic_name: str ):
     
     generic_sig = inspect.signature( generic_declarator_func )
