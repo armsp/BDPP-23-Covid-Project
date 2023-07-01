@@ -19,11 +19,11 @@ In a second pipenv shell, run `is_server=1 watchmedo auto-restart -p "server.py"
 
 ## Model installation
 
-If you do not want to train the model(s) yourself and you have a pickled model, from this here directory (`project`) execute the model installation script: E.g. `python3 install_model.py full.pkl train_honest_forward`. Here `full.pkl` is the path to your pickled model and `train_honest_forward` is the name of the computation node that yields this model normally. Essentially, we perform a manual cache insertion to avoid computation. Warning: This may circumvent automatic cache invalidation. Make sure you know what you are doing and know where the model `full.pkl` comes from. A pretrained model of the latest version is always available [here](https://gnorpel.com/full.pkl).
+If you have git LFS, the necessary models to replicate the results in `predict_h.ipynb` and the server above should already be installed in the `node_cache`.
 
 ## Git
 
-Before you commit anything with git, make sure you are not committing any artifact files by editing the local `.gitignore`.
+Before you commit anything with git, make sure you are not committing any accidental artifact files by editing the local `.gitignore`.
 
 ## Data
 

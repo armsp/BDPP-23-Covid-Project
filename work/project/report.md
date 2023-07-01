@@ -8,7 +8,9 @@ This web app lets the user play government with the benefit of hindsight: For a 
 
 Our focus is on providing a frontend for modifying Covid-19 measurement data and answering counterfactual questions based on a model which can be switched at runtime. Training such models for Covid-19 data itself is of secondary interest, since it is difficult enough on its own and is expected to require domain knowledge. It is a design goal to exhibit a minimal, responsive and intuitive interface which could be used by policy makers.
 
+
 ![Example use of webapp](report/webapp.png "Example use of webapp")
+*Example use of webapp*
 
 ## Challenges
 
@@ -17,7 +19,9 @@ Our focus is on providing a frontend for modifying Covid-19 measurement data and
 For outcomes (cases, deaths, etc.), we used the OWID (Our World in Data) Covid-19 data due to its good goverage spatially and temporally. For measures, we first tried using the ACAPS Covid-19 dataset which contains detailed textual information about measures in some countries. Ultimately, it was a) too cumbersome to reliably extract numerical information from text with ChatGPT b) providing too little coverage (spatially and temporally). We then found the OxCGRT (Oxford Covid Government Response Tracker) repository, which conveniently provides numerical information, but it took about 2 days of work to read through the documentation and understand which parts of the data we could (and should) use for our project. For example, we decided to focus on nation-wide measures, which requires masking the provided measure data with another so-called *flag* file. We then joined OWID and Oxford into a single set of time series for each country of interest. NaN-handling was fairly trivial by cropping and very few singular forward fills. For training, categorical columns need to be converted to dummy binary columns.
 
 ![Outcome data for Costa Rica](report/costa_rica_outcomes.png "Costa Rica Outcomes")
+*Costa Rica Outcomes*
 ![Measure data for Costa Rica](report/costa_rica_measures.png "Costa Rica Measures")
+*Costa Rica Measures*
 
 See `compute_data_for_country.py`, `categorical_to_dummy.py`, `get_oxford_categorical_flagged.py`, `get_oxford_df.py`
 
@@ -44,6 +48,8 @@ Since models are trained on windows, it would be too easy (and questionable) to 
 For our `honest_forward` model, using a train/test split of 80/20 over the manually cleaned dataset (see above), 24% of the countries predicted out-of-sample achieve a positive R2 score.
 
 ![Predicition for Germany (in-sample)](report/germany.png "Germany (in-sample)")
+*Predicition for Germany (in-sample)*
 ![Predicition for India (out-of-sample)](report/india.png "India (out-of-sample)")
+*Predicition for India (out-of-sample)*
 
 See `predict_h.ipynb`
