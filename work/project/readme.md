@@ -19,7 +19,7 @@ In a second pipenv shell, run `is_server=1 watchmedo auto-restart -p "server.py"
 
 ## Model installation
 
-If you do not want to train the model(s) yourself and you have a pickled model, from this here directory (`project`) execute the model installation script: E.g. `python3 install_model.py full.pkl train_honest_forward`. Here `full.pkl` is the path to your pickled model and `train_honest_forward` is the name of the computation node that yields this model normally. Essentially, we perform a manual cache insertion to avoid computation. Warning: This circumvents automatic cache invalidation. Make sure you know what you are doing and know where the model `full.pkl` comes from.
+If you do not want to train the model(s) yourself and you have a pickled model, from this here directory (`project`) execute the model installation script: E.g. `python3 install_model.py full.pkl train_honest_forward`. Here `full.pkl` is the path to your pickled model and `train_honest_forward` is the name of the computation node that yields this model normally. Essentially, we perform a manual cache insertion to avoid computation. Warning: This may circumvent automatic cache invalidation. Make sure you know what you are doing and know where the model `full.pkl` comes from. A pretrained model of the latest version is always available [here](https://gnorpel.com/full.pkl).
 
 ## Git
 
