@@ -13,6 +13,10 @@ We assume you have `pipenv` and `python 3.9` installed on your machine (or [virt
 
 In a second pipenv shell, run `is_server=1 watchmedo auto-restart -p "server.py" -R python3 -- server.py` for an autoreloading server (think nodemon). You can launch this shell from jupyter, Visual Studio Code or by creating a new shell in terminal.
 
+## Model installation
+
+If you do not want to train the model(s) yourself and you have a pickled model, from this here directory (`project`) execute the model installation script: E.g. `python3 install_model.py full.pkl train_honest_forward`. Here `full.pkl` is the path to your pickled model and `train_honest_forward` is the name of the computation node that yields this model normally. Essentially, we perform a manual cache insertion to avoid computation. Warning: This circumvents automatic cache invalidation. Make sure you know what you are doing and know where the model `full.pkl` comes from.
+
 ## Git
 
 Before you commit anything with git, make sure you are not committing any artifact files by editing the local `.gitignore`.
@@ -62,7 +66,7 @@ The code is backed by a computation graph system (aka `./node.py` system) that e
 - [ ] write: why ditch hospitalization data
 - [ ] write: why linear model is not robust against low-evidence data and switch to random forest
 - [ ] write: why evaluation of time series with r2 is difficult and arbitrary, but luckily not the entire focus
-- [ ] find some way to add trained models to deliverable
+- [x] find some way to add trained models to deliverable
 
 #### maybe / future
 - [ ] introduce confidence
