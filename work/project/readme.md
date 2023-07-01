@@ -1,4 +1,8 @@
 # Project
+## Report
+
+Find the project report [here](./report.md).
+
 ## Setup
 
 We assume you have `pipenv` and `python 3.9` installed on your machine (or [virtual machine](../../docker/readme.md)).
@@ -62,10 +66,10 @@ The code is backed by a computation graph system (aka `./node.py` system) that e
 - [x] write: documentation for each file, especially the require, nodes, etc. lot
 - [x] train on many more countries and regions
 - [x] introduce model evaluation during training using cross validation against out-of-sample time series
-- [ ] write: how to use the app
-- [ ] write: why ditch hospitalization data
-- [ ] write: why linear model is not robust against low-evidence data and switch to random forest
-- [ ] write: why evaluation of time series with r2 is difficult and arbitrary, but luckily not the entire focus
+- [x] write: how to use the app
+- [x] write: why ditch hospitalization data
+- [x] write: why linear model is not robust against low-evidence data and switch to random forest
+- [x] write: why evaluation of time series with r2 is difficult and arbitrary, but luckily not the entire focus
 - [x] find some way to add trained models to deliverable
 
 #### maybe / future

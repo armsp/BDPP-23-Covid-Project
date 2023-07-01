@@ -357,7 +357,7 @@ function update_data_hard( ) {
 
     // Scale the range of the data again 
     x.domain(d3.extent(data, function(d) { return d.date; }));
-    y.domain([0, is_categorical ? n_categories : Math.max( 1, d3.max(data, function(d) { return d.close; }))]);
+    y.domain([0, is_categorical ? n_categories - 1 : Math.max( 1, d3.max(data, function(d) { return d.close; }))]);
 
     if( is_categorical ) {
 
