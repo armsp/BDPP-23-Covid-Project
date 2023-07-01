@@ -61,6 +61,7 @@ The code is backed by a computation graph system (aka `./node.py` system) that e
 - [ ] write: how to use the app
 - [ ] write: why ditch hospitalization data
 - [ ] write: why linear model is not robust against low-evidence data and switch to random forest
+- [ ] write: why evaluation of time series with r2 is difficult and arbitrary, but luckily not the entire focus
 - [ ] find some way to add trained models to deliverable
 
 #### maybe / future
